@@ -7,12 +7,22 @@ import (
 	"slices"
 )
 
-// type Edition struct {
-// 	isbn string // ISBN13 for the book, or if no ISBN13 exists, then it is ISBN10
-// }
+type Work struct {
+	Title    string    // Title of the work
+	Author   string    // Author(s)
+	Editions []Edition // Contains all editions identified
+	Url      string    // Url to the work at openlibrary
+}
 
-// getWorks takes an ISBN, looks up the edition on openlibrary and returns the first work.
-func getWork(isbn string) (string, error) {
+type Edition struct {
+	Title    string // Title of the edition
+	Isbn     string // Isbn13, or if not found the Isbn10
+	Language string // Language of the edition
+	Ebook    bool   // If the edition is a Ebook
+}
+
+// findWork takes an ISBN, looks up the edition on openlibrary and returns the first work.
+func findWork(isbn string) (string, error) {
 	url := fmt.Sprintf("https://openlibrary.org/isbn/%s.json", isbn)
 	resp, err := http.Get(url)
 	if err != nil {
@@ -32,7 +42,7 @@ func getWork(isbn string) (string, error) {
 	return result.Works[0].Key, nil
 }
 
-// getEditions takes a reference to a work on openlibrary and the required languages. 
+// getEditions takes a reference to a work on openlibrary and the required languages.
 // It returns all IBNS13' that belong to that work. If no ISBN13 exists, it will return the ISBN10 for that edition.
 func getEditions(work string, langs []string) ([]string, error) {
 	url := fmt.Sprintf("https://openlibrary.org/%s/editions.json", work)
@@ -47,26 +57,11 @@ func getEditions(work string, langs []string) ([]string, error) {
 			FullTitle string   `json:"full_title,omitempty"`
 			Isbn13    []string `json:"isbn_13"`
 			Isbn10    []string `json:"isbn_10"`
-			Key       string   `json:"key"`
 			Languages []struct {
 				Key string `json:"key"`
 			} `json:"languages,omitempty"`
 			PhysicalFormat string   `json:"physical_format,omitempty"`
-			ByStatement    string   `json:"by_statement,omitempty"`
-			Contributions  []string `json:"contributions,omitempty"`
-			Description    struct {
-				Type  string `json:"type"`
-				Value string `json:"value"`
-			} `json:"description,omitempty"`
-			DeweyDecimalClass []string `json:"dewey_decimal_class,omitempty"`
-			EditionName       string   `json:"edition_name,omitempty"`
-			Ocaid             string   `json:"ocaid,omitempty"`
-			OclcNumbers       []string `json:"oclc_numbers,omitempty"`
-			PublishCountry    string   `json:"publish_country,omitempty"`
-			PublishPlaces     []string `json:"publish_places,omitempty"`
-			Series            []string `json:"series,omitempty"`
-			WorkTitles        []string `json:"work_titles,omitempty"`
-			Weight            string   `json:"weight,omitempty"`
+			Series         []string `json:"series,omitempty"`
 		}
 	}
 
@@ -93,4 +88,71 @@ func getEditions(work string, langs []string) ([]string, error) {
 		}
 	}
 	return editions, nil
+}
+
+func getWork(isbn string) (Work, error) {
+	work := Work{}
+	var err error
+
+	// Get Work url
+	work.Url, err = findWork(isbn)
+	if err != nil {
+		return work, err // Todo: rewrite this to proper error usage
+	}
+	// Get Work details
+	url := fmt.Sprintf("https://openlibrary.org/%s.json", work.Url)
+	resp, err := http.Get(url)
+	if err != nil {
+		return work, err
+	}
+	defer resp.Body.Close()
+
+	var result struct {
+		Title   string `json:"title"`
+		Authors []struct {
+			Author struct {
+				Key string `json:"key"`
+			} `json:"author"`
+		} `json:"authors"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return work, err
+	}
+
+	work.Title = result.Title
+	// get Author details 
+	l := len(result.Authors)
+	switch {
+	case l == 1:
+		work.Author, err = getAuthorDetails(result.Authors[0].Author.Key)
+	case l > 1:
+		work.Author,err = getAuthorDetails(result.Authors[0].Author.Key)
+		for _, a := range result.Authors[1:] {
+			var author string
+			author, err = getAuthorDetails(fmt.Sprint(a)) // TODO: err gets overwritten, add?
+			work.Author += fmt.Sprintf(", %s", author)
+		}
+	}
+	return work, err
+}
+
+// getAuthorDetails takes the openlibrary reference to an author and returns the name of the author as a string.
+func getAuthorDetails(author string) (string, error) {
+	url := fmt.Sprintf("https://openlibrary.org/%s.json", author)
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	var result struct {
+		Name string `json:"name"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", err
+	}
+
+	return result.Name, nil
 }

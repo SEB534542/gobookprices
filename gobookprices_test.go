@@ -8,7 +8,7 @@ import (
 func TestGetWorks(t *testing.T) {
 	// TODO: test for editions with multiple works?
 	want := "/works/OL16807297W"
-	got, err := getWork("9780575104181")
+	got, err := findWork("9780575104181")
 	switch {
 	case err != nil:
 		t.Errorf("Unknown error when fetching works for %v: %v", want, err)
@@ -33,7 +33,7 @@ func TestGetEditions(t *testing.T) {
 	})
 
 	t.Run("Zero results test", func(t *testing.T) {
-		want:= []string{} // no results expected
+		want := []string{} // no results expected
 		got, err := getEditions("/works/OL5623531W", []string{"/languages/eng"})
 		switch {
 		case err != nil:
@@ -42,4 +42,30 @@ func TestGetEditions(t *testing.T) {
 			t.Errorf("\nWant: '%+v', Got: '%+v'", want, got)
 		}
 	})
+}
+
+func TestGetWork(t *testing.T) {
+	want := Work{
+		Title:  "Menselijke levensloop",
+		Author: "Hendrik Cammaer",
+		Url:    "/works/OL5623531W",
+	}
+	got, err := getWork("9033405474")
+	switch {
+	case err != nil:
+		t.Errorf("Unknown error when fetching works for %v: %v", want, err)
+	case !reflect.DeepEqual(want, got):
+		t.Errorf("\nWant: '%+v', Got: '%+v'", want, got)
+	}
+}
+
+func TestGetAuthorDetails(t *testing.T) {
+	want := "Hendrik Cammaer"
+	got, err := getAuthorDetails("/authors/OL1357372A")
+	switch {
+	case err != nil:
+		t.Errorf("Unknown error when fetching works for %v: %v", want, err)
+	case want != got:
+		t.Errorf("\nWant: '%+v', Got: '%+v'", want, got)
+	}
 }
