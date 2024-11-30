@@ -8,10 +8,11 @@ import (
 )
 
 type Work struct {
-	Title    string    // Title of the work
-	Author   string    // Author(s)
-	Editions []Edition // Contains all editions identified
-	Url      string    // Url to the work at openlibrary
+	Title     string    // Title of the work
+	Author    string    // Author(s)
+	Url       string    // Url to the work at openlibrary
+	Languages []string  // Languages that editions should have
+	Editions  []Edition // Contains all editions identified
 }
 
 type Edition struct {
@@ -90,8 +91,11 @@ func getEditions(work string, langs []string) ([]string, error) {
 	return editions, nil
 }
 
-func getWork(isbn string) (Work, error) {
+// GetWork takes an ISBN and preferred languages and returns the associated Work with underlying editions and an error.
+func GetWork(isbn string, languages []string) (Work, error) {
 	work := Work{}
+	work.Languages = languages
+
 	var err error
 
 	// Get Work url
@@ -121,19 +125,20 @@ func getWork(isbn string) (Work, error) {
 	}
 
 	work.Title = result.Title
-	// get Author details 
+	// get Author details
 	l := len(result.Authors)
 	switch {
 	case l == 1:
 		work.Author, err = getAuthorDetails(result.Authors[0].Author.Key)
 	case l > 1:
-		work.Author,err = getAuthorDetails(result.Authors[0].Author.Key)
+		work.Author, err = getAuthorDetails(result.Authors[0].Author.Key)
 		for _, a := range result.Authors[1:] {
 			var author string
 			author, err = getAuthorDetails(fmt.Sprint(a)) // TODO: err gets overwritten, add?
 			work.Author += fmt.Sprintf(", %s", author)
 		}
 	}
+
 	return work, err
 }
 
@@ -155,4 +160,54 @@ func getAuthorDetails(author string) (string, error) {
 	}
 
 	return result.Name, nil
+}
+
+func (work *Work) GetEditions() error {
+	url := fmt.Sprintf("https://openlibrary.org/%s/editions.json", work.Url)
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	var result struct {
+		Entries []struct {
+			Title     string   `json:"title"`
+			Isbn13    []string `json:"isbn_13"`
+			Isbn10    []string `json:"isbn_10"`
+			Languages []struct {
+				Key string `json:"key"`
+			} `json:"languages,omitempty"`
+			PhysicalFormat string   `json:"physical_format,omitempty"`
+			Series         []string `json:"series,omitempty"`
+		}
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return err
+	}
+
+	// TODO: filter on languages and return only that list
+	work.Editions = make([]Edition, 0, len(result.Entries))
+	for _, v := range result.Entries {
+		// check if edition is in requested language
+		for _, lang := range v.Languages {
+			if slices.Contains(work.Languages, lang.Key) {
+				var isbn string
+				switch {
+				case len(v.Isbn13) != 0:
+					isbn = v.Isbn13[0]
+				case len(v.Isbn10) != 0:
+					isbn = v.Isbn10[0]
+				}
+				work.Editions = append(work.Editions, Edition{
+					Title:    v.Title,
+					Isbn:     isbn,
+					Language: lang.Key,
+				})
+				break
+			}
+		}
+	}
+	return nil
 }
