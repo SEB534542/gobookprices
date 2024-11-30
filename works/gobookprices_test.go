@@ -27,38 +27,7 @@ func TestGetAuthorDetails(t *testing.T) {
 	}
 }
 
-func TestGetWork(t *testing.T) {
-	want := Work{
-		Title:     "Menselijke levensloop",
-		Author:    "Hendrik Cammaer",
-		Url:       "/works/OL5623531W",
-		Languages: []string{"/languages/eng", "/languages/dut"},
-	}
-	got, err := getWork("9033405474", []string{"/languages/eng", "/languages/dut"})
-	switch {
-	case err != nil:
-		t.Errorf("Unknown error when fetching works for %v: %v", want, err)
-	case !reflect.DeepEqual(want, got):
-		t.Errorf("\nWant: '%+v', Got: '%+v'", want, got)
-	}
-
-	// Get Editions
-	got.GetEditions()
-	want.Editions = []Edition{
-		{
-			Title:    "Menselijke levensloop",
-			Isbn:     "9033405474",
-			Language: "/languages/dut",
-		}}
-	switch {
-	case err != nil:
-		t.Errorf("Unknown error when fetching works for %v: %v", want, err)
-	case !reflect.DeepEqual(want, got):
-		t.Errorf("\nWant: '%+v', Got: '%+v'", want, got)
-	}
-}
-
-func TestTemp(t *testing.T) {
+func TestNewWork(t *testing.T) {
 	want := Work{
 		Title:     "Menselijke levensloop",
 		Author:    "Hendrik Cammaer",
