@@ -27,7 +27,7 @@ func findWork(isbn string) (string, error) {
 	url := fmt.Sprintf("https://openlibrary.org/isbn/%s.json", isbn)
 	resp, err := http.Get(url)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("unable to get data from url: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -38,7 +38,7 @@ func findWork(isbn string) (string, error) {
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to convert results from json: %w", err)
 	}
 	return result.Works[0].Key, nil
 }
@@ -53,13 +53,13 @@ func getWork(isbn string, languages []string) (Work, error) {
 	// Get Work url
 	work.Url, err = findWork(isbn)
 	if err != nil {
-		return work, err // Todo: rewrite this to proper error usage
+		return work, fmt.Errorf("unable to get data from url: %w", err)
 	}
 	// Get Work details
 	url := fmt.Sprintf("https://openlibrary.org/%s.json", work.Url)
 	resp, err := http.Get(url)
 	if err != nil {
-		return work, err
+		return work, fmt.Errorf("unable to get data from url: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -73,7 +73,7 @@ func getWork(isbn string, languages []string) (Work, error) {
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return work, err
+		return work, fmt.Errorf("failed to convert results from json: %w", err)
 	}
 
 	work.Title = result.Title
@@ -86,9 +86,12 @@ func getWork(isbn string, languages []string) (Work, error) {
 		work.Author, err = getAuthorDetails(result.Authors[0].Author.Key)
 		for _, a := range result.Authors[1:] {
 			var author string
-			author, err = getAuthorDetails(fmt.Sprint(a)) // TODO: err gets overwritten, add?
+			author, err = getAuthorDetails(fmt.Sprint(a))
 			work.Author += fmt.Sprintf(", %s", author)
 		}
+	}
+	if err != nil {
+		err = fmt.Errorf("error retieving author details: %w", err)
 	}
 	return work, err
 }
@@ -98,7 +101,7 @@ func getAuthorDetails(author string) (string, error) {
 	url := fmt.Sprintf("https://openlibrary.org/%s.json", author)
 	resp, err := http.Get(url)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("unable to get data from url %s: %w", url, err)
 	}
 	defer resp.Body.Close()
 
@@ -107,7 +110,7 @@ func getAuthorDetails(author string) (string, error) {
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to convert results from json: %w", err)
 	}
 
 	return result.Name, nil
@@ -117,11 +120,11 @@ func getAuthorDetails(author string) (string, error) {
 func NewWork(isbn string, languages []string) (Work, error) {
 	work, err := getWork(isbn, languages)
 	if err != nil {
-		return work, err
+		return work, fmt.Errorf("error while retrieving work: %w", err)
 	}
 	err = work.GetEditions()
 	if err != nil {
-		return work, err
+		return work, fmt.Errorf("error while retrieving editions: %w", err)
 	}
 	return work, nil
 }
