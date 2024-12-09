@@ -12,6 +12,7 @@ import (
 const goodreadsURL = "https://www.goodreads.com/review/list/"
 
 type book struct {
+	id     string // this is the data-resource-id from goodreads, used as identifier for a book.
 	title  string
 	author string
 	isbn   string
@@ -40,6 +41,7 @@ func getBooksFromPage(url string) ([]book, error) {
 	books := []book{}
 
 	doc.Find("#booksBody tr").Each(func(j int, l *goquery.Selection) {
+		id, _ := l.Find(".js-tooltipTrigger").Attr("data-resource-id")
 		title := strings.ReplaceAll(strings.TrimSuffix(strings.TrimSpace(l.Find(".title .value").Text()), "\n        *"), "\n        ", " ")
 		author := strings.TrimSuffix(strings.TrimSpace(l.Find(".author .value").Text()), "\n        *")
 		isbn := strings.TrimSpace(l.Find(".isbn .value").Text())
@@ -52,6 +54,7 @@ func getBooksFromPage(url string) ([]book, error) {
 			}
 		}
 		books = append(books, book{
+			id:     id,
 			title:  title,
 			author: author,
 			isbn:   isbn,
