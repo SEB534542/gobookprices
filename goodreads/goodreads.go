@@ -12,10 +12,11 @@ import (
 const goodreadsURL = "https://www.goodreads.com/review/list/"
 
 type book struct {
-	id     string // this is the data-resource-id from goodreads, used as identifier for a book.
-	title  string
-	author string
-	isbn   string
+	title      string
+	author     string
+	isbn       string // Remove not relevant?
+	workUrl    string // This is the data-resource-id from goodreads, used as identifier for a work.
+	editionUrl string // This is the url to all editions of the work
 }
 
 // getBooksFromPage takes an url to a specific page in a goodreads public account and returns the books and an error.
@@ -41,7 +42,6 @@ func getBooksFromPage(url string) ([]book, error) {
 	books := []book{}
 
 	doc.Find("#booksBody tr").Each(func(j int, l *goquery.Selection) {
-		id, _ := l.Find(".js-tooltipTrigger").Attr("data-resource-id")
 		title := strings.ReplaceAll(strings.TrimSuffix(strings.TrimSpace(l.Find(".title .value").Text()), "\n        *"), "\n        ", " ")
 		author := strings.TrimSuffix(strings.TrimSpace(l.Find(".author .value").Text()), "\n        *")
 		isbn := strings.TrimSpace(l.Find(".isbn .value").Text())
@@ -53,11 +53,16 @@ func getBooksFromPage(url string) ([]book, error) {
 				isbn = strings.TrimSpace(l.Find(".asin .value").Text())
 			}
 		}
+		workUrl, _ := l.Find(".js-tooltipTrigger").Attr("data-resource-id")
+		workUrl = fmt.Sprintf("/book/show/%s", workUrl)
+		editionUrl, _ := l.Find("td.field.format a").Attr("href")
+
 		books = append(books, book{
-			id:     id,
-			title:  title,
-			author: author,
-			isbn:   isbn,
+			title:      title,
+			author:     author,
+			isbn:       isbn,
+			workUrl:    workUrl,
+			editionUrl: editionUrl,
 		})
 	})
 	return books, nil

@@ -1517,14 +1517,16 @@ React component will render its content.
 		defer server.Close()
 
 		want := []book{{
-			id:     "45047384",
-			title:  "The House in the Cerulean Sea (Cerulean Chronicles, #1)",
-			author: "Klune, T.J.",
+			title:      "The House in the Cerulean Sea (Cerulean Chronicles, #1)",
+			author:     "Klune, T.J.",
+      workUrl:    "/book/show/45047384",
+			editionUrl: "/work/editions/62945242",
 		}, {
-			id:     "127278666",
-			title:  "The Fox Wife",
-			author: "Choo, Yangsze",
-			isbn:   "1250266017",
+			title:      "The Fox Wife",
+			author:     "Choo, Yangsze",
+			isbn:       "1250266017",
+			workUrl:    "/book/show/127278666",
+      editionUrl: "/work/editions/148387285",
 		}}
 		got, err := getBooksFromPage(server.URL)
 		switch {
@@ -2887,3 +2889,8 @@ React component will render its content.
 // 		t.Errorf("Want: '%+v', Got: '%+v'", want, got)
 // 	}
 // }
+
+func TestGetEditions(t *testing.T) {
+	// https://www.goodreads.com/book/show/127278666-the-fox-wife
+	//want :=
+}
