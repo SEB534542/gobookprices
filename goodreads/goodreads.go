@@ -12,11 +12,17 @@ import (
 const goodreadsURL = "https://www.goodreads.com/review/list/"
 
 type book struct {
-	title      string
-	author     string
-	isbn       string // Remove not relevant?
-	workUrl    string // This is the data-resource-id from goodreads, used as identifier for a work.
-	editionUrl string // This is the url to all editions of the work
+	title       string
+	author      string
+	isbn        string // Remove not relevant?
+	workUrl     string // This is the data-resource-id from goodreads, used as identifier for a work.
+	editionsUrl string // This is the url to all editions of the work
+}
+
+type edition struct {
+	isbn     string
+	format   string
+	language string
 }
 
 // getBooksFromPage takes an url to a specific page in a goodreads public account and returns the books and an error.
@@ -58,11 +64,11 @@ func getBooksFromPage(url string) ([]book, error) {
 		editionUrl, _ := l.Find("td.field.format a").Attr("href")
 
 		books = append(books, book{
-			title:      title,
-			author:     author,
-			isbn:       isbn,
-			workUrl:    workUrl,
-			editionUrl: editionUrl,
+			title:       title,
+			author:      author,
+			isbn:        isbn,
+			workUrl:     workUrl,
+			editionsUrl: editionUrl,
 		})
 	})
 	return books, nil
@@ -74,12 +80,10 @@ func getBooks(goodreadsId, shelf string) ([]book, error) {
 	books := []book{}
 	for p := 1; ; p++ {
 		url := fmt.Sprintf("%s%s?page=%d&per_page=20&shelf=%s", goodreadsURL, goodreadsId, p, shelf)
-		fmt.Printf("getting data from %s\n", url)
 		b, err := getBooksFromPage(url)
 		if len(b) == 0 {
 			break
 		}
-		fmt.Printf("%v books found\n", len(b))
 		books = append(books, b...)
 		if err != nil {
 			return books, err
@@ -87,4 +91,37 @@ func getBooks(goodreadsId, shelf string) ([]book, error) {
 		time.Sleep(time.Second) // wait one second, to limit queries to goodreads (not sure if this is necessary)
 	}
 	return books, nil
+}
+
+func getEditions(url string) ([]edition, error) {
+	// https://www.goodreads.com/work/editions/148387285
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("getting books from %s failed: %v", url, err)
+	}
+	defer resp.Body.Close()
+
+	// Read the body.
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("creating document failed: %v", err)
+	}
+
+	editions := []edition{}
+
+	doc.Find(".editionData .dataRow").Each(func(i int, s *goquery.Selection) {
+		e := edition{}
+		//Get text content
+		text := strings.TrimSpace(s.Text())
+
+		// Check if the text contains "pages"
+		if strings.Contains(text, "pages") {
+			e.format = text
+		}
+
+		if e.format != "" {
+			editions = append(editions, e)
+		}
+	})
+	return editions, nil
 }
