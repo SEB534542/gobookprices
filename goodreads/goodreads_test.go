@@ -1,15 +1,10 @@
 package gobookprices
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"strings"
 	"testing"
-
-	"github.com/PuerkitoBio/goquery"
 )
 
 func TestGetBooksFromPage(t *testing.T) {
@@ -1520,7 +1515,7 @@ React component will render its content.
 			w.Write([]byte(mockHTML))
 		}))
 		defer server.Close()
-    
+
 		want := []book{{
 			id:     "45047384",
 			title:  "The House in the Cerulean Sea (Cerulean Chronicles, #1)",
