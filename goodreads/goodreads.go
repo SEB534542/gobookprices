@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
+
+const goodreadsURL = "https://www.goodreads.com/review/list/"
 
 type book struct {
 	title  string
@@ -57,6 +60,23 @@ func getBooksFromPage(url string) ([]book, error) {
 	return books, nil
 }
 
-// func getBooks(goodreadsId string) ([]book, error){
-
-// }
+// getBooks takes a goodreadsID and a specific shelf. It returns the books from that shelf and an error.
+// Example url https://www.goodreads.com/review/list/68156753?page=1&per_page=20&shelf=to-read
+func getBooks(goodreadsId, shelf string) ([]book, error) {
+	books := []book{}
+	for p := 1; ; p++ {
+		url := fmt.Sprintf("%s%s?page=%d&per_page=20&shelf=%s", goodreadsURL, goodreadsId, p, shelf)
+		fmt.Printf("getting data from %s\n", url)
+		b, err := getBooksFromPage(url)
+		if len(b) == 0 {
+			break
+		}
+		fmt.Printf("%v books found\n", len(b))
+		books = append(books, b...)
+		if err != nil {
+			return books, err
+		}
+		time.Sleep(time.Second) // wait one second, to limit queries to goodreads (not sure if this is necessary)
+	}
+	return books, nil
+}
