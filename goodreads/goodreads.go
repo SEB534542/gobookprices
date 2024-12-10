@@ -2,7 +2,9 @@ package gobookprices
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -101,27 +103,53 @@ func getEditions(url string) ([]edition, error) {
 	}
 	defer resp.Body.Close()
 
-	// Read the body.
+	// Load the HTML document
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("creating document failed: %v", err)
+		log.Fatal(err)
 	}
 
-	editions := []edition{}
+	var editions []edition
 
-	doc.Find(".editionData .dataRow").Each(func(i int, s *goquery.Selection) {
-		e := edition{}
-		//Get text content
-		text := strings.TrimSpace(s.Text())
+	// Regex to clean up the ISBN, removing anything within parentheses
+	reISBN := regexp.MustCompile(`\s*\(.*?\)`)
 
-		// Check if the text contains "pages"
-		if strings.Contains(text, "pages") {
-			e.format = text
-		}
+	// Find each "elementList clearFix"
+	doc.Find(".elementList.clearFix").Each(func(i int, selection *goquery.Selection) {
+		var e edition
 
-		if e.format != "" {
+		// Extract format (e.g., "Hardcover, 396 pages")
+		selection.Find(".dataRow").Each(func(j int, dataRow *goquery.Selection) {
+			text := strings.TrimSpace(dataRow.Text())
+			if strings.Contains(text, "pages") {
+				// Take the part before the comma
+				e.format = strings.Split(text, ",")[0]
+			}
+		})
+
+		// Extract ISBN
+		selection.Find(".dataTitle:contains('ISBN')").Each(func(j int, dataTitle *goquery.Selection) {
+			dataValue := dataTitle.SiblingsFiltered(".dataValue").Text()
+			cleanedISBN := strings.TrimSpace(reISBN.ReplaceAllString(dataValue, ""))
+			e.isbn = cleanedISBN
+		})
+
+		// Extract language (Edition language)
+		selection.Find(".dataTitle:contains('Edition language')").Each(func(j int, dataTitle *goquery.Selection) {
+			dataValue := dataTitle.SiblingsFiltered(".dataValue").Text()
+			e.language = strings.TrimSpace(dataValue)
+		})
+
+		// Add to editions slice if at least one field is populated
+		if e.format != "" || e.isbn != "" || e.language != "" {
 			editions = append(editions, e)
 		}
 	})
+
+	// Print the result
+	for _, ed := range editions {
+		fmt.Printf("ISBN: %s, Format: %s, Language: %s\n", ed.isbn, ed.format, ed.language)
+	}
+
 	return editions, nil
 }
