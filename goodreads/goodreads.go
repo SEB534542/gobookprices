@@ -2,7 +2,6 @@ package gobookprices
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"regexp"
 	"strings"
@@ -32,14 +31,14 @@ type edition struct {
 func getBooksFromPage(url string) ([]book, error) {
 	resp, err := http.Get(url)
 	if err != nil {
-		return nil, fmt.Errorf("getting books from %s failed: %v", url, err)
+		return nil, fmt.Errorf("getting books from %s failed: %w", url, err)
 	}
 	defer resp.Body.Close()
 
 	// Read the body.
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("creating document failed: %v", err)
+		return nil, fmt.Errorf("creating document failed: %w", err)
 	}
 
 	nocontent := strings.TrimSpace(doc.Find(".greyText.nocontent.stacked").Text())
@@ -95,8 +94,9 @@ func getBooks(goodreadsId, shelf string) ([]book, error) {
 	return books, nil
 }
 
-func getEditions(url string) ([]edition, error) {
-	// https://www.goodreads.com/work/editions/148387285
+// getEditionsFromPage takes an url containing editions on goodreads, scapes and returns the editions and an error.
+// Example url: fmt.Sprintf("https://www.goodreads.com/work/editions/%s?page=1&per_page=10", editionsUrl)
+func getEditionsFromPage(url string) ([]edition, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("getting books from %s failed: %v", url, err)
@@ -106,7 +106,7 @@ func getEditions(url string) ([]edition, error) {
 	// Load the HTML document
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		return []edition{}, fmt.Errorf("failed to get editions from '%s' failed: %w", url, err)
 	}
 
 	var editions []edition
@@ -145,11 +145,5 @@ func getEditions(url string) ([]edition, error) {
 			editions = append(editions, e)
 		}
 	})
-
-	// Print the result
-	for _, ed := range editions {
-		fmt.Printf("ISBN: %s, Format: %s, Language: %s\n", ed.isbn, ed.format, ed.language)
-	}
-
 	return editions, nil
 }
