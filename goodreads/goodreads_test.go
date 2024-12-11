@@ -2831,66 +2831,70 @@ React component will render its content.
 }
 
 // TestGetBooks does a complete test to fetch all books from a shelf directly from goodreads.
-// It is commented out, because the TestGetBooksFromPage test the underlying logic using mocks.
+// It is commented out, because the TestGetBooksFromPage tests the underlying logic using mocks.
 // And continuously running tests directly to goodreads is unnecessary.
 // Also the shelf in this test is subject to changes, so the test would fall.
-// func TestGetBooks(t *testing.T) {
-// 	want := []book{
-// 		{title: "The House in the Cerulean Sea (Cerulean Chronicles, #1)", author: "Klune, T.J.", isbn: ""},
-// 		{title: "The Fox Wife", author: "Choo, Yangsze", isbn: "1250266017"},
-// 		{title: "The Book of Doors", author: "Brown, Gareth", isbn: "0063323982"},
-// 		{title: "Argylle", author: "Conway, Elly", isbn: "0593600010"},
-// 		{title: "Steelheart (The Reckoners, #1)", author: "Sanderson, Brandon", isbn: "0385743564"},
-// 		{title: "The Lusty Argonian Maid Vol 1", author: "Curio, Crassius", isbn: ""},
-// 		{title: "Het parfum", author: "Süskind, Patrick", isbn: "9057134101"},
-// 		{title: "Wind and Truth (The Stormlight Archive, #5)", author: "Sanderson, Brandon", isbn: "1250319188"},
-// 		{title: "Edgedancer (The Stormlight Archive, #2.5)", author: "Sanderson, Brandon", isbn: "1250166543"},
-// 		{title: "Red Rising (Red Rising Saga, #1)", author: "Brown, Pierce", isbn: ""},
-// 		{title: "Fool's Assassin (The Fitz and the Fool, #1)", author: "Hobb, Robin", isbn: "0553392433"},
-// 		{title: "Master and Apprentice", author: "Gray, Claudia", isbn: "0525619372"},
-// 		{title: "Dark Disciple", author: "Golden, Christie", isbn: "B01EKIFQ7Y"},
-// 		{title: "Enterprise Architecture As Strategy: Creating a Foundation for Business Execution", author: "Ross, Jeanne W.", isbn: "1591398398"},
-// 		{title: "Dawn (Legend of the Galactic Heroes, #1)", author: "Tanaka, Yoshiki", isbn: "1421584948"},
-// 		{title: "Think and Grow Rich", author: "Hill, Napoleon", isbn: ""},
-// 		{title: "Children of Time (Children of Time, #1)", author: "Tchaikovsky, Adrian", isbn: "1447273281"},
-// 		{title: "The Red Knight (The Traitor Son Cycle, #1)", author: "Cameron, Miles", isbn: "0575113294"},
-// 		{title: "The Girl and the Stars (Book of the Ice, #1)", author: "Lawrence, Mark", isbn: "1984805991"},
-// 		{title: "The Pariah (Covenant of Steel, #1)", author: "Ryan, Anthony", isbn: "0316430773"},
-// 		{title: "Ready Player Two (Ready Player One, #2)", author: "Cline, Ernest", isbn: "1524761338"},
-// 		{title: "Red Sister (Book of the Ancestor, #1)", author: "Lawrence, Mark", isbn: "1101988851"},
-// 		{title: "De hondenmoorden (Oxen, #1)", author: "Jensen, Jens Henrik", isbn: "9400505787"},
-// 		{title: "Postkantoor", author: "Bukowski, Charles", isbn: "9023417429"},
-// 		{title: "The Book That Wouldn’t Burn (The Library Trilogy, #1)", author: "Lawrence, Mark", isbn: "0593437918"},
-// 		{title: "Bloedmaan", author: "Nesbø, Jo", isbn: "9403126426"},
-// 		{title: "Grand Hotel Europa", author: "Pfeijffer, Ilja Leonard", isbn: "902952622X"},
-// 		{title: "The Atlas Six (The Atlas, #1)", author: "Blake, Olivie", isbn: "1529095255"},
-// 		{title: "Mistborn: The Wax and Wayne Series: The Alloy of Law, Shadows of Self, The Bands of Mourning", author: "Sanderson, Brandon", isbn: "1250293499"},
-// 		{title: "The Hand of the Sun King (Pact and Pattern, #1)", author: "Greathouse, J.T.", isbn: "1473232902"},
-// 		{title: "The Hypnotist (Joona Linna, #1)", author: "Kepler, Lars", isbn: "0374173958"},
-// 		{title: "A Master of Djinn (Dead Djinn Universe, #1)", author: "Clark, P. Djèlí", isbn: "1250267676"},
-// 		{title: "The Stardust Thief (The Sandsea Trilogy, #1)", author: "Abdullah, Chelsea", isbn: "0316368768"},
-// 		{title: "Black Sun (Between Earth and Sky, #1)", author: "Roanhorse, Rebecca", isbn: "1534437673"},
-// 		{title: "Futuristic Violence and Fancy Suits (Zoey Ashe #1)", author: "Wong, David", isbn: "1783291842"},
-// 		{title: "The Alloy of Law (Mistborn, #4)", author: "Sanderson, Brandon", isbn: "0765330423"},
-// 		{title: "A Darker Shade of Magic (Shades of Magic, #1)", author: "Schwab, Victoria", isbn: "0765376458"},
-// 		{title: "The Lies of Locke Lamora (Gentleman Bastard, #1)", author: "Lynch, Scott", isbn: ""},
-// 		{title: "Jade City (The Green Bone Saga, #1)", author: "Lee, Fonda", isbn: "0316440884"},
-// 		{title: "Ship of Magic (The Liveship Traders, #1)", author: "Hobb, Robin", isbn: "B0DLT8H3NY"},
-// 		{title: "The Sanatorium (Detective Elin Warner, #1)", author: "Pearse, Sarah", isbn: "0593296672"},
-// 		{title: "The Last Magician (The Last Magician, #1)", author: "Maxwell, Lisa", isbn: "1481432079"},
-// 		{title: "The Shadow of the Gods (The Bloodsworn Saga, #1)", author: "Gwynne, John", isbn: "0356514188"},
-// 		{title: "The Desert Prince (Nightfall Saga, #1)", author: "Brett, Peter V.", isbn: "0008309779"},
-// 	}
-// 	got, err := getBooks("68156753", "to-read")
-// 	switch {
-// 	case err != nil:
-// 		t.Errorf("error getting books: \nWant: '%+v', Got: '%+v'", want, got)
-// 	case !reflect.DeepEqual(want, got):
-// 		t.Errorf("Want: '%+v', Got: '%+v'", want, got)
-// 	}
-// }
+func TestGetBooks(t *testing.T) {
+	//	want := []book{
+	//		{title: "The House in the Cerulean Sea (Cerulean Chronicles, #1)", author: "Klune, T.J.", isbn: ""},
+	//		{title: "The Fox Wife", author: "Choo, Yangsze", isbn: "1250266017"},
+	//		{title: "The Book of Doors", author: "Brown, Gareth", isbn: "0063323982"},
+	//		{title: "Argylle", author: "Conway, Elly", isbn: "0593600010"},
+	//		{title: "Steelheart (The Reckoners, #1)", author: "Sanderson, Brandon", isbn: "0385743564"},
+	//		{title: "The Lusty Argonian Maid Vol 1", author: "Curio, Crassius", isbn: ""},
+	//		{title: "Het parfum", author: "Süskind, Patrick", isbn: "9057134101"},
+	//		{title: "Wind and Truth (The Stormlight Archive, #5)", author: "Sanderson, Brandon", isbn: "1250319188"},
+	//		{title: "Edgedancer (The Stormlight Archive, #2.5)", author: "Sanderson, Brandon", isbn: "1250166543"},
+	//		{title: "Red Rising (Red Rising Saga, #1)", author: "Brown, Pierce", isbn: ""},
+	//		{title: "Fool's Assassin (The Fitz and the Fool, #1)", author: "Hobb, Robin", isbn: "0553392433"},
+	//		{title: "Master and Apprentice", author: "Gray, Claudia", isbn: "0525619372"},
+	//		{title: "Dark Disciple", author: "Golden, Christie", isbn: "B01EKIFQ7Y"},
+	//		{title: "Enterprise Architecture As Strategy: Creating a Foundation for Business Execution", author: "Ross, Jeanne W.", isbn: "1591398398"},
+	//		{title: "Dawn (Legend of the Galactic Heroes, #1)", author: "Tanaka, Yoshiki", isbn: "1421584948"},
+	//		{title: "Think and Grow Rich", author: "Hill, Napoleon", isbn: ""},
+	//		{title: "Children of Time (Children of Time, #1)", author: "Tchaikovsky, Adrian", isbn: "1447273281"},
+	//		{title: "The Red Knight (The Traitor Son Cycle, #1)", author: "Cameron, Miles", isbn: "0575113294"},
+	//		{title: "The Girl and the Stars (Book of the Ice, #1)", author: "Lawrence, Mark", isbn: "1984805991"},
+	//		{title: "The Pariah (Covenant of Steel, #1)", author: "Ryan, Anthony", isbn: "0316430773"},
+	//		{title: "Ready Player Two (Ready Player One, #2)", author: "Cline, Ernest", isbn: "1524761338"},
+	//		{title: "Red Sister (Book of the Ancestor, #1)", author: "Lawrence, Mark", isbn: "1101988851"},
+	//		{title: "De hondenmoorden (Oxen, #1)", author: "Jensen, Jens Henrik", isbn: "9400505787"},
+	//		{title: "Postkantoor", author: "Bukowski, Charles", isbn: "9023417429"},
+	//		{title: "The Book That Wouldn’t Burn (The Library Trilogy, #1)", author: "Lawrence, Mark", isbn: "0593437918"},
+	//		{title: "Bloedmaan", author: "Nesbø, Jo", isbn: "9403126426"},
+	//		{title: "Grand Hotel Europa", author: "Pfeijffer, Ilja Leonard", isbn: "902952622X"},
+	//		{title: "The Atlas Six (The Atlas, #1)", author: "Blake, Olivie", isbn: "1529095255"},
+	//		{title: "Mistborn: The Wax and Wayne Series: The Alloy of Law, Shadows of Self, The Bands of Mourning", author: "Sanderson, Brandon", isbn: "1250293499"},
+	//		{title: "The Hand of the Sun King (Pact and Pattern, #1)", author: "Greathouse, J.T.", isbn: "1473232902"},
+	//		{title: "The Hypnotist (Joona Linna, #1)", author: "Kepler, Lars", isbn: "0374173958"},
+	//		{title: "A Master of Djinn (Dead Djinn Universe, #1)", author: "Clark, P. Djèlí", isbn: "1250267676"},
+	//		{title: "The Stardust Thief (The Sandsea Trilogy, #1)", author: "Abdullah, Chelsea", isbn: "0316368768"},
+	//		{title: "Black Sun (Between Earth and Sky, #1)", author: "Roanhorse, Rebecca", isbn: "1534437673"},
+	//		{title: "Futuristic Violence and Fancy Suits (Zoey Ashe #1)", author: "Wong, David", isbn: "1783291842"},
+	//		{title: "The Alloy of Law (Mistborn, #4)", author: "Sanderson, Brandon", isbn: "0765330423"},
+	//		{title: "A Darker Shade of Magic (Shades of Magic, #1)", author: "Schwab, Victoria", isbn: "0765376458"},
+	//		{title: "The Lies of Locke Lamora (Gentleman Bastard, #1)", author: "Lynch, Scott", isbn: ""},
+	//		{title: "Jade City (The Green Bone Saga, #1)", author: "Lee, Fonda", isbn: "0316440884"},
+	//		{title: "Ship of Magic (The Liveship Traders, #1)", author: "Hobb, Robin", isbn: "B0DLT8H3NY"},
+	//		{title: "The Sanatorium (Detective Elin Warner, #1)", author: "Pearse, Sarah", isbn: "0593296672"},
+	//		{title: "The Last Magician (The Last Magician, #1)", author: "Maxwell, Lisa", isbn: "1481432079"},
+	//		{title: "The Shadow of the Gods (The Bloodsworn Saga, #1)", author: "Gwynne, John", isbn: "0356514188"},
+	//		{title: "The Desert Prince (Nightfall Saga, #1)", author: "Brett, Peter V.", isbn: "0008309779"},
+	//	}
+	//
+	// got, err := getBooks("/review/list/68156753", "to-read")
+	// switch {
+	// case err != nil:
+	//
+	//	t.Errorf("error getting books: \nWant: '%+v', Got: '%+v'", want, got)
+	//
+	// case !reflect.DeepEqual(want, got):
+	//
+	//		t.Errorf("Want: '%+v', Got: '%+v'", want, got)
+	//	}
+}
 
-func TestGetEditions(t *testing.T) {
+func TestGetEditionsFromPage(t *testing.T) {
 	mockHTML := `
 <!DOCTYPE html>
 <html class="desktop withSiteHeaderTopFullImage
@@ -4380,4 +4384,19 @@ React component will render its content.
 	case !reflect.DeepEqual(want, got):
 		t.Fatalf("Want: '%+v', Got: '%+v'", want, got)
 	}
+}
+
+// TestGetEditions does a complete test to fetch all editions from a work directly from goodreads.
+// It is commented out, because the TestGetEditionsFromPage tests the underlying logic using mocks.
+// And continuously running tests directly to goodreads is unnecessary.
+// Also new editions might be added which would result in thet test failing.
+func TestGetEditions(t *testing.T) {
+	// want := []edition{{isbn: "9789044934120", format: "ebook", language: "Dutch"}, {isbn: "9788408255178", format: "Kindle Edition", language: "Spanish"}}
+	// got, err := getEditions("/work/editions/94024291", EbookFormats, []string{"Dutch", "Spanish"})
+	// switch {
+	// case err != nil:
+	// 	t.Errorf("error getting editions: \nWant: '%+v', Got: '%+v'", want, got)
+	// case !reflect.DeepEqual(want, got):
+	// 	t.Fatalf("Want: '%+v', Got: '%+v'", want, got)
+	// }
 }

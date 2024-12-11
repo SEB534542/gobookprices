@@ -10,7 +10,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-const goodreadsURL = "https://www.goodreads.com/review/list/"
+const goodreadsURL = "https://www.goodreads.com/"
 
 type book struct {
 	title       string
@@ -24,6 +24,11 @@ type edition struct {
 	isbn     string
 	format   string
 	language string
+}
+
+var EbookFormats = map[string]bool{
+	"ebook":          true,
+	"Kindle Edition": true,
 }
 
 // getBooksFromPage takes an url to a specific page in a goodreads public account and returns the books and an error.
@@ -75,19 +80,19 @@ func getBooksFromPage(url string) ([]book, error) {
 	return books, nil
 }
 
-// getBooks takes a goodreadsID and a specific shelf. It returns the books from that shelf and an error.
+// getBooks takes a list and a specific shelf. It returns the books from that shelf and an error.
 // Example url https://www.goodreads.com/review/list/68156753?page=1&per_page=20&shelf=to-read
-func getBooks(goodreadsId, shelf string) ([]book, error) {
+func getBooks(goodreadsList, shelf string) ([]book, error) {
 	books := []book{}
 	for p := 1; ; p++ {
-		url := fmt.Sprintf("%s%s?page=%d&per_page=20&shelf=%s", goodreadsURL, goodreadsId, p, shelf)
+		url := fmt.Sprintf("%s%s?page=%d&per_page=20&shelf=%s", goodreadsURL, goodreadsList, p, shelf)
 		b, err := getBooksFromPage(url)
 		if len(b) == 0 {
 			break
 		}
 		books = append(books, b...)
 		if err != nil {
-			return books, err
+			return books, fmt.Errorf("error getting books from %s: %w", url, err)
 		}
 		time.Sleep(time.Second) // wait one second, to limit queries to goodreads (not sure if this is necessary)
 	}
@@ -146,4 +151,42 @@ func getEditionsFromPage(url string) ([]edition, error) {
 		}
 	})
 	return editions, nil
+}
+
+// getEditions takes an url to editions on goodreads, the required formats and languages. It returns all editions that belong to that work, adhere to the parameters and have a ISBN.
+// Example expected url: "/work/editions/146380232"
+func getEditions(editionsUrl string, formats map[string]bool, languages []string) ([]edition, error) {
+	editions := []edition{}
+	for p := 1; ; p++ {
+		url := fmt.Sprintf("%s%s?page=%d&per_page=20", goodreadsURL, editionsUrl, p)
+
+		// Get all editions from page
+		results, err := getEditionsFromPage(url)
+		if len(results) == 0 {
+			break
+		}
+
+		// Filter to include only editions that have the required format, language and where isbn is not empty
+		for _, e := range results {
+			if formats[e.format] && contains(languages, e.language) && e.isbn != "" {
+				editions = append(editions, e)
+			}
+		}
+
+		if err != nil {
+			return editions, fmt.Errorf("error getting editions from %s: %w", url, err)
+		}
+		time.Sleep(time.Second) // wait one second, to limit queries to goodreads (not sure if this is necessary)
+	}
+	return editions, nil
+}
+
+// contains takes a slice of string an value, checks if that value exist in the slice and returns true if it does.
+func contains(slice []string, value string) bool {
+	for _, v := range slice {
+		if v == value {
+			return true
+		}
+	}
+	return false
 }
