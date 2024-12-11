@@ -17,7 +17,7 @@ type book struct {
 	author      string
 	isbn        string // Remove not relevant?
 	workUrl     string // This is the data-resource-id from goodreads, used as identifier for a work.
-	editionsUrl string // This is the url to all editions of the work
+	editionsUrl string // This is the url to all editions of the work.
 }
 
 type edition struct {
@@ -29,7 +29,7 @@ type edition struct {
 var EbookFormats = map[string]bool{
 	"ebook":          true,
 	"Kindle Edition": true,
-}
+} // EbooksFormats contains all formats that represent a form a ebook on goodreads.
 
 // getBooksFromPage takes an url to a specific page in a goodreads public account and returns the books and an error.
 // example url: fmt.Sprintf("https://www.goodreads.com/review/list/%s?page=1&per_page=20", yourGoodreadsId)
