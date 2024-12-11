@@ -1516,17 +1516,17 @@ React component will render its content.
 		}))
 		defer server.Close()
 
-		want := []book{{
-			title:       "The House in the Cerulean Sea (Cerulean Chronicles, #1)",
-			author:      "Klune, T.J.",
-			workUrl:     "/book/show/45047384",
-			editionsUrl: "/work/editions/62945242",
+		want := []Book{{
+			Title:       "The House in the Cerulean Sea (Cerulean Chronicles, #1)",
+			Author:      "Klune, T.J.",
+			WorkUrl:     "/book/show/45047384",
+			EditionsUrl: "/work/editions/62945242",
 		}, {
-			title:       "The Fox Wife",
-			author:      "Choo, Yangsze",
-			isbn:        "1250266017",
-			workUrl:     "/book/show/127278666",
-			editionsUrl: "/work/editions/148387285",
+			Title:       "The Fox Wife",
+			Author:      "Choo, Yangsze",
+			Isbn:        "1250266017",
+			WorkUrl:     "/book/show/127278666",
+			EditionsUrl: "/work/editions/148387285",
 		}}
 		got, err := getBooksFromPage(server.URL)
 		switch {
@@ -2818,7 +2818,7 @@ React component will render its content.
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(mockHTML))
 		}))
-		want := []book{}
+		want := []Book{}
 		got, err := getBooksFromPage(server.URL)
 		switch {
 		case err != nil:
@@ -2882,7 +2882,7 @@ func TestGetBooks(t *testing.T) {
 	//		{title: "The Desert Prince (Nightfall Saga, #1)", author: "Brett, Peter V.", isbn: "0008309779"},
 	//	}
 	//
-	// got, err := getBooks("/review/list/68156753", "to-read")
+	// got, err := GetBooks("/review/list/68156753", "to-read")
 	// switch {
 	// case err != nil:
 	//
@@ -4365,17 +4365,17 @@ React component will render its content.
 	}))
 	defer server.Close()
 
-	want := []edition{
-		{isbn: "", format: "Kindle Edition", language: "English"},
-		{isbn: "9781250217288", format: "Hardcover", language: "English"},
-		{isbn: "", format: "Kindle Edition", language: "English"},
-		{isbn: "9781250217318", format: "Reprint", language: "English"},
-		{isbn: "9781250357243", format: "Special Edition", language: "English"},
-		{isbn: "9788408253891", format: "Hardcover", language: "Spanish"},
-		{isbn: "9788804735144", format: "Hardcover", language: "Italian"},
-		{isbn: "9783453321366", format: "Paperback", language: "German"},
-		{isbn: "9781529087949", format: "UK Edition", language: "English"},
-		{isbn: "9788328724952", format: "Paperback", language: "Polish"},
+	want := []Edition{
+		{Isbn: "", Format: "Kindle Edition", Language: "English"},
+		{Isbn: "9781250217288", Format: "Hardcover", Language: "English"},
+		{Isbn: "", Format: "Kindle Edition", Language: "English"},
+		{Isbn: "9781250217318", Format: "Reprint", Language: "English"},
+		{Isbn: "9781250357243", Format: "Special Edition", Language: "English"},
+		{Isbn: "9788408253891", Format: "Hardcover", Language: "Spanish"},
+		{Isbn: "9788804735144", Format: "Hardcover", Language: "Italian"},
+		{Isbn: "9783453321366", Format: "Paperback", Language: "German"},
+		{Isbn: "9781529087949", Format: "UK Edition", Language: "English"},
+		{Isbn: "9788328724952", Format: "Paperback", Language: "Polish"},
 	}
 	got, err := getEditionsFromPage(server.URL)
 	switch {
@@ -4392,7 +4392,7 @@ React component will render its content.
 // Also new editions might be added which would result in thet test failing.
 func TestGetEditions(t *testing.T) {
 	// want := []edition{{isbn: "9789044934120", format: "ebook", language: "Dutch"}, {isbn: "9788408255178", format: "Kindle Edition", language: "Spanish"}}
-	// got, err := getEditions("/work/editions/94024291", EbookFormats, []string{"Dutch", "Spanish"})
+	// got, err := GetEditions("/work/editions/94024291", EbookFormats, []string{"Dutch", "Spanish"})
 	// switch {
 	// case err != nil:
 	// 	t.Errorf("error getting editions: \nWant: '%+v', Got: '%+v'", want, got)
