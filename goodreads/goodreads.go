@@ -10,7 +10,15 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-const goodreadsURL = "https://www.goodreads.com/"
+const HostUrl = "https://www.goodreads.com/"
+
+type Library struct {
+	Books     []Book
+	ListUrl   string
+	Shelf     string
+	Formats   map[string]bool
+	Languages []string
+}
 
 // Book represents a book on a goodread list. It can be a work or an edition.
 type Book struct {
@@ -85,10 +93,10 @@ func getBooksFromPage(url string) ([]Book, error) {
 
 // GetBooks takes a list and a specific shelf. It returns the books from that shelf and an error.
 // Example url: /review/list/68156753
-func GetBooks(goodreadsList, shelf string) ([]Book, error) {
+func GetBooks(hostUrl, goodreadsList, shelf string) ([]Book, error) {
 	books := []Book{}
 	for p := 1; ; p++ {
-		url := fmt.Sprintf("%s%s?page=%d&per_page=20&shelf=%s", goodreadsURL, goodreadsList, p, shelf)
+		url := fmt.Sprintf("%s%s?page=%d&per_page=20&shelf=%s", hostUrl, goodreadsList, p, shelf)		
 		b, err := getBooksFromPage(url)
 		if len(b) == 0 {
 			break
@@ -158,10 +166,10 @@ func getEditionsFromPage(url string) ([]Edition, error) {
 
 // GetEditions takes an url to editions on goodreads, the required formats and languages. It returns all editions that belong to that work, adhere to the parameters and have a ISBN.
 // Example expected url: "/work/editions/146380232"
-func GetEditions(editionsUrl string, formats map[string]bool, languages []string) ([]Edition, error) {
+func GetEditions(hostUrl, editionsUrl string, formats map[string]bool, languages []string) ([]Edition, error) {
 	editions := []Edition{}
 	for p := 1; ; p++ {
-		url := fmt.Sprintf("%s%s?page=%d&per_page=20", goodreadsURL, editionsUrl, p)
+		url := fmt.Sprintf("%s%s?page=%d&per_page=10", hostUrl, editionsUrl, p)
 
 		// Get all editions from page
 		results, err := getEditionsFromPage(url)
@@ -192,4 +200,8 @@ func contains(slice []string, value string) bool {
 		}
 	}
 	return false
+}
+
+func NewLibrary(HostUrl, listUrl, shelf string, formats map[string]bool, languages []string) (Library, error) {
+	return Library{}, nil
 }
