@@ -1,4 +1,4 @@
-// package main
+package main
 
 // import (
 // 	"bytes"
@@ -16,8 +16,6 @@
 // 	if err != nil {
 // 		fmt.Printf("error getting books from '%s': %v", url, err)
 // 	}
-
-	
 
 // 	fmt.Println("Saving to json...")
 // 	err = saveToJSON(books, "test.json")
