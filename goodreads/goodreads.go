@@ -208,8 +208,8 @@ func NewLibrary(hostUrl, listUrl, shelf string, formats []string, languages []st
 	}
 	var err error
 	l.Books, err = GetBooks(hostUrl, listUrl, shelf)
-	for i, b := range l.Books {
+	// for i, b := range l.Books {
 
-	}
+	// }
 	return l, err
 }
