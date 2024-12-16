@@ -13,11 +13,11 @@ import (
 const HostUrl = "https://www.goodreads.com/"
 
 type Library struct {
-	Books     []Book
 	ListUrl   string
 	Shelf     string
-	Formats   map[string]bool
+	Formats   []string
 	Languages []string
+	Books     []Book
 }
 
 // Book represents a book on a goodread list. It can be a work or an edition.
@@ -37,10 +37,7 @@ type Edition struct {
 	Language string
 }
 
-var EbookFormats = map[string]bool{
-	"ebook":          true,
-	"Kindle Edition": true,
-} // EbooksFormats contains all formats that represent a form a ebook on goodreads.
+var EbookFormats = []string{"ebook", "Kindle Edition"} // EbooksFormats contains all formats that represent a form a ebook on goodreads.
 
 // getBooksFromPage takes an url to a specific page in a goodreads public account and returns the books and an error.
 // example url: fmt.Sprintf("https://www.goodreads.com/review/list/%s?page=1&per_page=20", yourGoodreadsId)
@@ -96,7 +93,7 @@ func getBooksFromPage(url string) ([]Book, error) {
 func GetBooks(hostUrl, goodreadsList, shelf string) ([]Book, error) {
 	books := []Book{}
 	for p := 1; ; p++ {
-		url := fmt.Sprintf("%s%s?page=%d&per_page=20&shelf=%s", hostUrl, goodreadsList, p, shelf)		
+		url := fmt.Sprintf("%s%s?page=%d&per_page=20&shelf=%s", hostUrl, goodreadsList, p, shelf)
 		b, err := getBooksFromPage(url)
 		if len(b) == 0 {
 			break
@@ -166,7 +163,7 @@ func getEditionsFromPage(url string) ([]Edition, error) {
 
 // GetEditions takes an url to editions on goodreads, the required formats and languages. It returns all editions that belong to that work, adhere to the parameters and have a ISBN.
 // Example expected url: "/work/editions/146380232"
-func GetEditions(hostUrl, editionsUrl string, formats map[string]bool, languages []string) ([]Edition, error) {
+func GetEditions(hostUrl, editionsUrl string, formats []string, languages []string) ([]Edition, error) {
 	editions := []Edition{}
 	for p := 1; ; p++ {
 		url := fmt.Sprintf("%s%s?page=%d&per_page=10", hostUrl, editionsUrl, p)
@@ -179,7 +176,7 @@ func GetEditions(hostUrl, editionsUrl string, formats map[string]bool, languages
 
 		// Filter to include only editions that have the required format, language and where isbn is not empty
 		for _, e := range results {
-			if formats[e.Format] && contains(languages, e.Language) && e.Isbn != "" {
+			if contains(formats, e.Format) && contains(languages, e.Language) && e.Isbn != "" {
 				editions = append(editions, e)
 			}
 		}
@@ -202,6 +199,17 @@ func contains(slice []string, value string) bool {
 	return false
 }
 
-func NewLibrary(HostUrl, listUrl, shelf string, formats map[string]bool, languages []string) (Library, error) {
-	return Library{}, nil
+func NewLibrary(hostUrl, listUrl, shelf string, formats []string, languages []string) (Library, error) {
+	l := Library{
+		ListUrl:   listUrl,
+		Shelf:     shelf,
+		Formats:   formats,
+		Languages: languages,
+	}
+	var err error
+	l.Books, err = GetBooks(hostUrl, listUrl, shelf)
+	for i, b := range l.Books {
+
+	}
+	return l, err
 }
