@@ -40,7 +40,7 @@ type Edition struct {
 var EbookFormats = []string{"ebook", "Kindle Edition"} // EbooksFormats contains all formats that represent a form a ebook on goodreads.
 
 // getBooksFromPage takes an url to a specific page in a goodreads public account and returns the books and an error.
-// example url: "https://www.goodreads.com/review/list/68156753?page=%d&per_page=20&shelf=to-read"
+// example url: "https://www.goodreads.com/review/list/68156753?page=1&per_page=20&shelf=to-read"
 func getBooksFromPage(url string) ([]Book, error) {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -194,21 +194,6 @@ func contains(slice []string, value string) bool {
 	return false
 }
 
-func NewLibrary(hostUrl, listUrl, shelf string, formats []string, languages []string) (Library, error) {
-	l := Library{
-		ListUrl:   listUrl,
-		Shelf:     shelf,
-		Formats:   formats,
-		Languages: languages,
-	}
-	var err error
-	l.Books, err = GetBooks(hostUrl, listUrl, shelf)
-	// for i, b := range l.Books {
-
-	// }
-	return l, err
-}
-
 // getEditionsUrl takes an url goodreads, the url to the work and retrieves the EditionsUrl from that work.
 // E.g. for hostUrl "goodreads.com" and workUrl "/book/show/45047384", the corresponding editionsUrl is "/work/editions/62945242".
 func getEditionUrl(hostUrl, workUrl string) (string, error) {
@@ -244,4 +229,21 @@ func getEditionUrl(hostUrl, workUrl string) (string, error) {
 	})
 
 	return editionUrl, nil
+}
+
+func NewLibrary(hostUrl, listUrl, shelf string, formats []string, languages []string) (Library, error) {
+	// fmt.Println("Getting books:", hostUrl, listUrl, shelf)
+	// books, err := GetBooks(hostUrl, listUrl, shelf)
+	// fmt.Println("Done...")
+	// // for i, b := range l.Books {
+
+	// }
+	l := Library{
+		ListUrl:   listUrl,
+		Shelf:     shelf,
+		Formats:   formats,
+		Languages: languages,
+		//Books:     books,
+	}
+	return l, nil
 }

@@ -1,6 +1,7 @@
 package gobookprices
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -8931,7 +8932,7 @@ React component will render its content.
 </body>
 </html>
 <!-- This is a random-length HTML comment: gtxmkyjfksvjedojhozbewetjgaejufkwzbgcrgdxppcyjvlhkdsozvlfjmqcnflrpkokqajblnhgmnrjhjwfcaxefrmepzhjkxnuysebsnwywfdyurybydddrsevemfqettwafymojagdbeybgwzmwownkmvwayshsxrmhjecdtifxwoarqmhggpbcfpzelkttviwqmlvxncmojglwzunmkodpxzdzqindyadoynccubscyyoaiujmspfwnzaxdvteqflhpakdjkeqixoxqopztmikayqehynmkxjmxnidingohdlaszaiijhjkurmmgmtlwmcmstlbeuuezswdduyiqiqjujmzjzhpzoinhiwwikcakltgyojjhdnxztoeqxuypkgkcvybcmutfxezdvqmzimrcgwpizqvuhnmlomsjguslizsntiwcfbgwbzmkmzzxrskgvcxexxomvvwtokupycwqqwlywslmonzfgkokanzfvrxzzgxowtoglnbcarwovrujcnnlhflwizsnzupdzlwzhkcarnvlgcnlkvowumcpvqjlbwldhycetvsawzxhxydknzakdwaufxvsvhlfdddiepovwvrqubdihqakxwjjbhgmkwptucdrykkawcteippplbyubsokzctfunaxmcriulpbilwddxwsnkjhjjottewjpzuxaytvglxmuvjifhejlafqdsvjbsnplmpxqqnhrfwacrgcxjgtycusthgsyrqjjkcwgamxyfdkottowzgdacgixveqrknclwtlmryycbxfbighmiokvammcdjjlhfahcdpukfdbyngnkzviinrziuqfqchnlyqbjkhnhxdcrjlguhjwqdtxiwgymuhrdboksvwsuvzpqekxplqsjhgzefpwqlikgfckusipftqbzbplvgpjxdzdreaezsaykzfezzbotjoyjeadnkxugxmdhuefnjoilqunmyzduwklpuamhffidhxmbujpgcrlyjncgqdzqgvtnvabddzagsuahrxwhthizhmreijtgkvnvmvgkkuaxvhnnvpypcikecbixhcytcyinymjjyjhvcgnordgcdajaqhqpbonbnvtphacdivmfuitoatvxobyszygephulkqcclpjuqwqajgqkkosfusigpqnxkofhltxloyzshryt -->`
-	mockHtmlEdition = `
+	mockHtmlWork = `
 <!DOCTYPE html><html lang="en"><head><script>var ue_t0=window.ue_t0||+new Date();(function(e){var c=e,a={main_scope:"mainscopecsm",q:[],t0:c.ue_t0||+new Date(),d:g};function g(h){return +new Date()-(h?0:a.t0)}function d(h){return function(){a.q.push({n:h,a:arguments,t:a.d()})}}function b(k,j,h){var i={m:k,f:j,l:h,fromOnError:1,args:arguments};c.ueLogError(i);return false}b.skipTrace=1;e.onerror=b;function f(){c.uex("ld")}if(e.addEventListener){e.addEventListener("load",f,false)}else{if(e.attachEvent){e.attachEvent("onload",f)}}a.tag=d("tag");a.log=d("log");a.reset=d("rst");c.ue_csm=c;c.ue=a;c.ueLogError=d("err");c.ues=d("ues");c.uet=d("uet");c.uex=d("uex");c.uet("ue")})(window);(function(e,d){var a=e.ue||{};function c(g){if(!g){return}var f=d.head||d.getElementsByTagName("head")[0]||d.documentElement,h=d.createElement("script");h.async="async";h.src=g;f.insertBefore(h,f.firstChild)}function b(){var k=e.ue_cdn||"z-ecx.images-amazon.com",g=e.ue_cdns||"images-na.ssl-images-amazon.com",j="/images/G/01/csminstrumentation/",h=e.ue_file||"ue-full-ef584a44e8ea58e3d4d928956600a9b6._V1_.js",f,i;if(h.indexOf("NSTRUMENTATION_FIL")>=0){return}if("ue_https" in e){f=e.ue_https}else{f=e.location&&e.location.protocol=="https:"?1:0}i=f?"https://":"http://";i+=f?g:k;i+=j;i+=h;c(i)}if(!e.ue_inline){b()}a.uels=c;e.ue=a})(window,document);</script><script>!function(){function n(n,t){var r=i(n);return t&&(r=r("instance",t)),r}var r=[],c=0,i=function(t){return function(){var n=c++;return r.push([t,[].slice.call(arguments,0),n,{time:Date.now()}]),i(n)}};n._s=r,this.csa=n}()
     csa("Config", {
       "Application": "GoodreadsSirius",
@@ -8979,14 +8980,41 @@ React component will render its content.
 `
 )
 
-func TestGetBooksFromPage(t *testing.T) {
-	t.Run("basic test", func(t *testing.T) {
-		// Create a test server
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+var server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// Serve different HTML responses based on the path
+	if strings.Contains(r.URL.Path, "/review/list/") {
+		// Serve different HTML responses based on the query
+		if strings.Contains(r.URL.RawQuery, "page=1&per_page") {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(mockHtmlList1))
-		}))
-		defer server.Close()
+		} else if strings.Contains(r.URL.RawQuery, "page=2&per_page") {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(mockHtmlList2))
+		} else {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(mockHtmlList3))
+		}
+	}
+	if strings.Contains(r.URL.Path, "/work/editions/") {
+		if strings.Contains(r.URL.RawQuery, "page=1&per_page") {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(mockHtmlEditions1))
+		} else if strings.Contains(r.URL.RawQuery, "page=2&per_page") {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(mockHtmlEditions2))
+		} else {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(mockHtmlEditions3))
+		}
+	}
+	if strings.Contains(r.URL.Path, "/book/show/") {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(mockHtmlWork))
+	}
+}))
+
+func TestGetBooksFromPage(t *testing.T) {
+	t.Run("basic test", func(t *testing.T) {
 		want := []Book{
 			{Title: "The House in the Cerulean Sea (Cerulean Chronicles, #1)", Author: "Klune, T.J.", Isbn: "", WorkUrl: "/book/show/45047384"},
 			{Title: "The Fox Wife", Author: "Choo, Yangsze", Isbn: "1250266017", WorkUrl: "/book/show/127278666"},
@@ -9009,7 +9037,8 @@ func TestGetBooksFromPage(t *testing.T) {
 			{Title: "The Girl and the Stars (Book of the Ice, #1)", Author: "Lawrence, Mark", Isbn: "1984805991", WorkUrl: "/book/show/51277288"},
 			{Title: "The Pariah (Covenant of Steel, #1)", Author: "Ryan, Anthony", Isbn: "0316430773", WorkUrl: "/book/show/56229688"},
 		}
-		got, err := getBooksFromPage(server.URL)
+		url := fmt.Sprint(server.URL, "/review/list/68156753", "?page=1&per_page=20&shelf=to-read")
+		got, err := getBooksFromPage(url)
 		switch {
 		case err != nil:
 			t.Errorf("error getting books:\nWant:\n%+v\nGot:\n%+v\n", want, got)
@@ -9021,12 +9050,6 @@ func TestGetBooksFromPage(t *testing.T) {
 		}
 	})
 	t.Run("test with zero results", func(t *testing.T) {
-		// Create a test server
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(mockHtmlList3))
-		}))
-		defer server.Close()
 		want := []Book{}
 		got, err := getBooksFromPage(server.URL)
 		switch {
@@ -9043,6 +9066,7 @@ func TestGetBooksFromPage(t *testing.T) {
 			w.Write([]byte(""))
 		}))
 		defer server.Close()
+
 		want := []Book{}
 		got, err := getBooksFromPage(server.URL)
 		switch {
@@ -9055,20 +9079,6 @@ func TestGetBooksFromPage(t *testing.T) {
 }
 
 func TestGetBooks(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Serve different HTML responses based on the page number
-		if strings.Contains(r.URL.RawQuery, "page=1&per_page") {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(mockHtmlList1))
-		} else if strings.Contains(r.URL.RawQuery, "page=2&per_page") {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(mockHtmlList2))
-		} else {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(mockHtmlList3))
-		}
-	}))
-	defer server.Close()
 	want := []Book{
 		{Title: "The House in the Cerulean Sea (Cerulean Chronicles, #1)", Author: "Klune, T.J.", Isbn: "", WorkUrl: "/book/show/45047384"},
 		{Title: "The Fox Wife", Author: "Choo, Yangsze", Isbn: "1250266017", WorkUrl: "/book/show/127278666"},
@@ -9121,13 +9131,6 @@ func TestGetBooks(t *testing.T) {
 }
 
 func TestGetEditionsFromPage(t *testing.T) {
-	// Create a test server
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(mockHtmlEditions1))
-	}))
-	defer server.Close()
-
 	want := []Edition{
 		{Isbn: "9788408252856", Format: "Hardcover", Language: "Spanish"},
 		{Isbn: "", Format: "Kindle Edition", Language: "Spanish"},
@@ -9140,7 +9143,8 @@ func TestGetEditionsFromPage(t *testing.T) {
 		{Isbn: "9788466429306", Format: "Kindle Edition", Language: "Catalan; Valencian"},
 		{Isbn: "9788408255178", Format: "Kindle Edition", Language: "Spanish"},
 	}
-	got, err := getEditionsFromPage(server.URL)
+	url := fmt.Sprint(server.URL, "/work/editions/94024291", "?page=1&per_page=10")
+	got, err := getEditionsFromPage(url)
 	switch {
 	case err != nil:
 		t.Errorf("error getting editions:\nWant:\n%+v\nGot:\n%+v\n", want, got)
@@ -9153,22 +9157,6 @@ func TestGetEditionsFromPage(t *testing.T) {
 }
 
 func TestGetEditions(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Serve different HTML responses based on the page number
-		if strings.Contains(r.URL.RawQuery, "page=1&per_page") {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(mockHtmlEditions1))
-		} else if strings.Contains(r.URL.RawQuery, "page=2&per_page") {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(mockHtmlEditions2))
-		} else {
-			w.WriteHeader(http.StatusNotFound) // No more pages
-			// w.WriteHeader(http.StatusOK)
-			w.Write([]byte(mockHtmlEditions3))
-		}
-	}))
-	defer server.Close()
-
 	want := []Edition{
 		{Isbn: "9789044934120", Format: "ebook", Language: "Dutch"},
 		{Isbn: "9788408255178", Format: "Kindle Edition", Language: "Spanish"},
@@ -9183,13 +9171,6 @@ func TestGetEditions(t *testing.T) {
 }
 
 func TestGetEditionUrl(t *testing.T) {
-	// Create a test server
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(mockHtmlEdition))
-	}))
-	defer server.Close()
-
 	want := "/work/editions/62945242"
 	got, err := getEditionUrl(server.URL, "/book/show/45047384")
 	switch {
@@ -9200,17 +9181,22 @@ func TestGetEditionUrl(t *testing.T) {
 	}
 }
 
-// func TestNewLibrary(t *testing.T) {
-// 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		w.WriteHeader(http.StatusOK)
-// 		w.Write([]byte(mockHtmlList1))
-// 	}))
-// 	want := Library{}
-// 	got, err := NewLibrary(server.URL, "/review/list/68156753", "to-read", EbookFormats, []string{"Dutch", "Spanish"})
-// 	switch {
-// 	case err != nil:
-// 		t.Errorf("error getting editions: \nWant: '%+v', Got: '%+v'", want, got)
-// 	case !reflect.DeepEqual(want, got):
-// 		t.Fatalf("Want:\n'%+v'\nGot:\n'%+v'\n", want, got)
-// 	}
-// }
+func TestNewLibrary(t *testing.T) {
+	want := Library{}
+	fmt.Println("Requesting got...")
+	got, _ := NewLibrary(server.URL, "/review/list/68156753", "to-read", EbookFormats, []string{"Dutch", "Spanish"})
+
+	fmt.Println("got", got)
+	// books, err := GetBooks(server.URL, got.ListUrl, got.Shelf)
+	books, err := GetBooks(server.URL, "/review/list/68156753", "to-read")
+
+	fmt.Println("done", books)
+	got.Books = books
+
+	switch {
+	case err != nil:
+		t.Errorf("error creating new library:\nWant:%+v\nGot:\n%+v", want, got)
+	case !reflect.DeepEqual(want, got):
+		t.Fatalf("\nWant:\n%+v\nGot:\n%+v\n", want, got)
+	}
+}
