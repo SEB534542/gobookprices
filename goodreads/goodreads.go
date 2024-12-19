@@ -73,11 +73,11 @@ func getBooksFromPage(url string) ([]Book, error) {
 		// editionUrl, _ := l.Find("td.field.format a").Attr("href") // commented-out because this only works if you've accepted the cookies.
 
 		books = append(books, Book{
-			Title:       title,
-			Author:      author,
-			Isbn:        isbn,
-			WorkUrl:     workUrl,
-		//	EditionsUrl: editionUrl,
+			Title:   title,
+			Author:  author,
+			Isbn:    isbn,
+			WorkUrl: workUrl,
+			//	EditionsUrl: editionUrl,
 		})
 	})
 	return books, nil
@@ -207,4 +207,41 @@ func NewLibrary(hostUrl, listUrl, shelf string, formats []string, languages []st
 
 	// }
 	return l, err
+}
+
+// getEditionsUrl takes an url goodreads, the url to the work and retrieves the EditionsUrl from that work.
+// E.g. for hostUrl "goodreads.com" and workUrl "/book/show/45047384", the corresponding editionsUrl is "/work/editions/62945242".
+func getEditionUrl(hostUrl, workUrl string) (string, error) {
+	url := fmt.Sprint(hostUrl, workUrl)
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", fmt.Errorf("getting edition url from %s failed: %w", url, err)
+	}
+	defer resp.Body.Close()
+
+	// Read the body.
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("creating document failed: %w", err)
+	}
+
+	var editionUrl string
+
+	// Define a regex pattern to extract the editionURL
+	baseUrl := "/work/editions/"
+	pattern := regexp.MustCompile(`/work/quotes/(\d+)`)
+
+	// Iterate through all <a> tags
+	doc.Find("a[href]").Each(func(i int, s *goquery.Selection) {
+		href, exists := s.Attr("href")
+		if exists {
+			// Check if the href matches the pattern
+			matches := pattern.FindStringSubmatch(href)
+			if len(matches) > 1 {
+				editionUrl = fmt.Sprint(baseUrl, matches[1])
+			}
+		}
+	})
+
+	return editionUrl, nil
 }
