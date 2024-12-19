@@ -40,7 +40,7 @@ type Edition struct {
 var EbookFormats = []string{"ebook", "Kindle Edition"} // EbooksFormats contains all formats that represent a form a ebook on goodreads.
 
 // getBooksFromPage takes an url to a specific page in a goodreads public account and returns the books and an error.
-// example url: fmt.Sprintf("https://www.goodreads.com/review/list/%s?page=1&per_page=20", yourGoodreadsId)
+// example url: "https://www.goodreads.com/review/list/68156753?page=%d&per_page=20&shelf=to-read"
 func getBooksFromPage(url string) ([]Book, error) {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -52,11 +52,6 @@ func getBooksFromPage(url string) ([]Book, error) {
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("creating document failed: %w", err)
-	}
-
-	nocontent := strings.TrimSpace(doc.Find(".greyText.nocontent.stacked").Text())
-	if nocontent == "No matching items!" {
-		// Reset the page to break the loop.
 	}
 
 	books := []Book{}
@@ -75,14 +70,14 @@ func getBooksFromPage(url string) ([]Book, error) {
 		}
 		workUrl, _ := l.Find(".js-tooltipTrigger").Attr("data-resource-id")
 		workUrl = fmt.Sprintf("/book/show/%s", workUrl)
-		editionUrl, _ := l.Find("td.field.format a").Attr("href")
+		// editionUrl, _ := l.Find("td.field.format a").Attr("href") // commented-out because this only works if you've accepted the cookies.
 
 		books = append(books, Book{
 			Title:       title,
 			Author:      author,
 			Isbn:        isbn,
 			WorkUrl:     workUrl,
-			EditionsUrl: editionUrl,
+		//	EditionsUrl: editionUrl,
 		})
 	})
 	return books, nil
@@ -162,7 +157,7 @@ func getEditionsFromPage(url string) ([]Edition, error) {
 }
 
 // GetEditions takes an url to editions on goodreads, the required formats and languages. It returns all editions that belong to that work, adhere to the parameters and have a ISBN.
-// Example expected url: "/work/editions/146380232"
+// Example expected url: "/work/editions/94024291"
 func GetEditions(hostUrl, editionsUrl string, formats []string, languages []string) ([]Edition, error) {
 	editions := []Edition{}
 	for p := 1; ; p++ {
