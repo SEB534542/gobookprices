@@ -9099,7 +9099,10 @@ func TestGetEditionsFromPage(t *testing.T) {
 	case err != nil:
 		t.Errorf("error getting editions:\nWant:\n%+v\nGot:\n%+v\n", want, got)
 	case !reflect.DeepEqual(want, got):
-		t.Fatalf("\nWant:\n%+v\nGot:\n%+v\n", want, got)
+		// for _, e := range got {
+		// 	fmt.Printf("{Isbn: \"%s\", Format: \"%s\", Language: \"%s\"},\n", e.Isbn, e.Format, e.Language)
+		// }
+    t.Fatalf("\nWant:\n%+v\nGot:\n%+v\n", want, got)
 	}
 }
 
@@ -9131,6 +9134,10 @@ func TestGetEditions(t *testing.T) {
 	case !reflect.DeepEqual(want, got):
 		t.Fatalf("Want: '%+v', Got: '%+v'", want, got)
 	}
+}
+
+func TestGetEdition(t *testing.T) {
+	//want :=
 }
 
 // func TestNewLibrary(t *testing.T) {
