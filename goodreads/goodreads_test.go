@@ -9182,21 +9182,21 @@ func TestGetEditionUrl(t *testing.T) {
 }
 
 func TestNewLibrary(t *testing.T) {
-	want := Library{}
-	fmt.Println("Requesting got...")
-	got, _ := NewLibrary(server.URL, "/review/list/68156753", "to-read", EbookFormats, []string{"Dutch", "Spanish"})
-
-	fmt.Println("got", got)
-	// books, err := GetBooks(server.URL, got.ListUrl, got.Shelf)
-	books, err := GetBooks(server.URL, "/review/list/68156753", "to-read")
-
-	fmt.Println("done", books)
-	got.Books = books
+	want := Library{
+    ListUrl: "/review/list/68156753",
+    Shelf: "to-read",
+    Formats: EbookFormats,
+    Languages: []string{"Dutch", "Spanish"},
+  }
+	got, err := NewLibrary(server.URL, want.ListUrl, want.Shelf, want.Formats, want.Languages)
 
 	switch {
 	case err != nil:
 		t.Errorf("error creating new library:\nWant:%+v\nGot:\n%+v", want, got)
 	case !reflect.DeepEqual(want, got):
-		t.Fatalf("\nWant:\n%+v\nGot:\n%+v\n", want, got)
+    for _, b := range got.Books {
+				fmt.Printf("{Title: \"%s\", Author: \"%s\", Isbn: \"%s\", WorkUrl: \"%s\"},\n", b.Title, b.Author, b.Isbn, b.WorkUrl)
+			}
+    t.Fatalf("\nWant:\n%+v\nGot:\n%+v\n", want, got)
 	}
 }

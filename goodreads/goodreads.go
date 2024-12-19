@@ -232,18 +232,19 @@ func getEditionUrl(hostUrl, workUrl string) (string, error) {
 }
 
 func NewLibrary(hostUrl, listUrl, shelf string, formats []string, languages []string) (Library, error) {
-	// fmt.Println("Getting books:", hostUrl, listUrl, shelf)
-	// books, err := GetBooks(hostUrl, listUrl, shelf)
-	// fmt.Println("Done...")
-	// // for i, b := range l.Books {
-
-	// }
+	books, err := GetBooks(hostUrl, listUrl, shelf)
+	for i, _ := range books {
+		// get the Editions Url
+		books[i].EditionsUrl, err = getEditionUrl(HostUrl, books[i].WorkUrl)
+		// get all editions from that url
+		books[i].Editions, err = GetEditions(HostUrl, books[i].EditionsUrl, formats, languages)
+	}
 	l := Library{
 		ListUrl:   listUrl,
 		Shelf:     shelf,
 		Formats:   formats,
 		Languages: languages,
-		//Books:     books,
+		Books:     books,
 	}
-	return l, nil
+	return l, err
 }
