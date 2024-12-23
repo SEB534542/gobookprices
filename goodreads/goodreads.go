@@ -243,20 +243,36 @@ func NewLibrary(listUrl, shelf string, formats []string, languages []string) Lib
 	return l
 }
 
-// Update connects to the host with all parameters that are specified in the type. It retrieves all books and returns an error.
+// Update connects to the host with all parameters that are specified in the type. It retrieves all books, get the editions not yet present, and returns an error.
 func (l *Library) Update() error {
+	booksNew, err := GetBooks(l.hostUrl, l.ListUrl, l.Shelf)
+	l.Books = compareAndUpdate(l.Books, booksNew)
+
+	// Get editionsUlr editions, if missing
+	for i, b := range l.Books {
+		if b.EditionsUrl == "" {
+			l.Books[i].EditionsUrl, _ = getEditionUrl(l.hostUrl, l.Books[i].WorkUrl)
+		}
+		if len(b.Editions) == 0 {
+			l.Books[i].Editions, err = GetEditions(HostUrl, l.Books[i].EditionsUrl, l.Formats, l.Languages)
+		}
+	}
+	return err
+}
+
+// UpdateFull connects to the host with all parameters that are specified in the type. It retrieves all books and retrieves the corresponding editions. It returns an error.
+func (l *Library) UpdateFull() error {
 	var err error
 	l.Books, err = GetBooks(l.hostUrl, l.ListUrl, l.Shelf)
+
 	for i := range l.Books {
-		// get the Editions Url
 		l.Books[i].EditionsUrl, _ = getEditionUrl(l.hostUrl, l.Books[i].WorkUrl)
-		// get all editions from that url
 		l.Books[i].Editions, err = GetEditions(HostUrl, l.Books[i].EditionsUrl, l.Formats, l.Languages)
 	}
 	return err
 }
 
-// compareAndUpdate takes two slice of Books. It updates the second slice with the editionUrl and editions from the first slice, and returns the second slice with the updated data.
+// compareAndUpdate takes two slices of Books. It updates the second slice with the editionUrl and editions from the first slice, and returns the second slice with the updated data.
 func compareAndUpdate(booksOld, booksNew []Book) []Book {
 	// Only use books that have actual data to update the new library with this data
 	books := []Book{}
