@@ -107,7 +107,7 @@ func GetBooks(hostUrl, goodreadsList, shelf string) ([]Book, error) {
 func getEditionsFromPage(url string) ([]Edition, error) {
 	resp, err := http.Get(url)
 	if err != nil {
-		return nil, fmt.Errorf("getting books from %s failed: %v", url, err)
+		return nil, fmt.Errorf("getting books from %s failed: %w", url, err)
 	}
 	defer resp.Body.Close()
 
