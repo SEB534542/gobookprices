@@ -255,3 +255,26 @@ func (l *Library) Update() error {
 	}
 	return err
 }
+
+// compareAndUpdate takes two slice of Books. It updates the second slice with the editionUrl and editions from the first slice, and returns the second slice with the updated data.
+func compareAndUpdate(booksOld, booksNew []Book) []Book {
+	// Only use books that have actual data to update the new library with this data
+	books := []Book{}
+	for _, old := range booksOld {
+		if old.EditionsUrl != "" || len(old.Editions) != 0 {
+			books = append(books, old)
+		}
+	}
+
+	// Update new library with data from old library, based on the workUrl
+	for i, new := range booksNew {
+		for _, b := range books {
+			if new.WorkUrl == b.WorkUrl {
+				booksNew[i].EditionsUrl = b.EditionsUrl
+				booksNew[i].Editions = b.Editions
+				break
+			}
+		}
+	}
+	return booksNew
+}
