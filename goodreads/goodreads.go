@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -97,7 +96,7 @@ func GetBooks(hostUrl, goodreadsList, shelf string) ([]Book, error) {
 		if err != nil {
 			return books, fmt.Errorf("error getting books from %s: %w", url, err)
 		}
-		time.Sleep(time.Second) // wait one second, to limit queries to goodreads (not sure if this is necessary)
+		// time.Sleep(time.Second) // wait one second, to limit queries to goodreads (not sure if this is necessary)
 	}
 	return books, nil
 }
@@ -179,7 +178,7 @@ func GetEditions(hostUrl, editionsUrl string, formats []string, languages []stri
 		if err != nil {
 			return editions, fmt.Errorf("error getting editions from %s: %w", url, err)
 		}
-		time.Sleep(time.Second) // wait one second, to limit queries to goodreads (not sure if this is necessary)
+		// time.Sleep(time.Second) // wait one second, to limit queries to goodreads (not sure if this is necessary)
 	}
 	return editions, nil
 }
@@ -235,9 +234,13 @@ func NewLibrary(hostUrl, listUrl, shelf string, formats []string, languages []st
 	books, err := GetBooks(hostUrl, listUrl, shelf)
 	for i, _ := range books {
 		// get the Editions Url
-		books[i].EditionsUrl, err = getEditionUrl(HostUrl, books[i].WorkUrl)
+		// books[i].EditionsUrl, _ = getEditionUrl(hostUrl, books[i].WorkUrl)\
+		url, _ := getEditionUrl(hostUrl, books[i].WorkUrl)
+		books[i].EditionsUrl = url
 		// get all editions from that url
-		books[i].Editions, err = GetEditions(HostUrl, books[i].EditionsUrl, formats, languages)
+		// books[i].Editions, err = GetEditions(HostUrl, books[i].EditionsUrl, formats, languages)
+		editions, _ := GetEditions(HostUrl, books[i].EditionsUrl, formats, languages)
+		books[i].Editions = editions
 	}
 	l := Library{
 		ListUrl:   listUrl,
