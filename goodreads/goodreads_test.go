@@ -10754,46 +10754,51 @@ func TestGetEditionUrl(t *testing.T) {
 
 func TestNewLibrary(t *testing.T) {
 	want := Library{
+		hostUrl:   server.URL,
 		ListUrl:   "/review/list/test",
 		Shelf:     "to-read",
 		Formats:   EbookFormats,
 		Languages: []string{"Dutch", "Spanish"},
-		Books: []Book{
-			{
-				Title:       "The Poppy War (The Poppy War, #1)",
-				Author:      "Kuang, R.F.",
-				Isbn:        "0062662597",
-				WorkUrl:     "/book/show/35068705",
-				EditionsUrl: "/work/editions/62945242",
-				Editions: []Edition{
-					{Isbn: "9788408258216", Format: "Kindle Edition", Language: "Spanish"},
-					{Isbn: "9786070791734", Format: "Kindle Edition", Language: "Spanish"},
-          {Isbn:"9789021462691", Format:"ebook", Language:"Dutch"},
-				},
+	}
+	got := NewLibrary(want.ListUrl, want.Shelf, want.Formats, want.Languages)
+	got.hostUrl = server.URL
+
+	if !reflect.DeepEqual(want, got) {
+		t.Fatalf("\nWant:\n%+v\nGot:\n%+v\n", want, got)
+	}
+
+	want.Books = []Book{
+		{
+			Title:       "The Poppy War (The Poppy War, #1)",
+			Author:      "Kuang, R.F.",
+			Isbn:        "0062662597",
+			WorkUrl:     "/book/show/35068705",
+			EditionsUrl: "/work/editions/62945242",
+			Editions: []Edition{
+				{Isbn: "9788408258216", Format: "Kindle Edition", Language: "Spanish"},
+				{Isbn: "9786070791734", Format: "Kindle Edition", Language: "Spanish"},
+				{Isbn: "9789021462691", Format: "ebook", Language: "Dutch"},
 			},
-			{
-				Title:       "The House in the Cerulean Sea (Cerulean Chronicles, #1)",
-				Author:      "Klune, T.J.",
-				Isbn:        "B07QPHT8CB",
-				WorkUrl:     "/book/show/45047384",
-				EditionsUrl: "/work/editions/62945242",
-				Editions: []Edition{
-					{Isbn: "9788408258216", Format: "Kindle Edition", Language: "Spanish"},
-					{Isbn: "9786070791734", Format: "Kindle Edition", Language: "Spanish"},
-          {Isbn:"9789021462691", Format:"ebook", Language:"Dutch"},
-				},
+		},
+		{
+			Title:       "The House in the Cerulean Sea (Cerulean Chronicles, #1)",
+			Author:      "Klune, T.J.",
+			Isbn:        "B07QPHT8CB",
+			WorkUrl:     "/book/show/45047384",
+			EditionsUrl: "/work/editions/62945242",
+			Editions: []Edition{
+				{Isbn: "9788408258216", Format: "Kindle Edition", Language: "Spanish"},
+				{Isbn: "9786070791734", Format: "Kindle Edition", Language: "Spanish"},
+				{Isbn: "9789021462691", Format: "ebook", Language: "Dutch"},
 			},
 		},
 	}
-	got, err := NewLibrary(server.URL, want.ListUrl, want.Shelf, want.Formats, want.Languages)
+	err := got.Update()
 
 	switch {
 	case err != nil:
-		t.Errorf("error creating new library:\nWant:%+v\nGot:\n%+v", want, got)
+		t.Errorf("error updating library:\nWant:%+v\nGot:\n%+v", want, got)
 	case !reflect.DeepEqual(want, got):
-		for _, b := range got.Books {
-			fmt.Printf("{Title: \"%s\", Author: \"%s\", Isbn: \"%s\", WorkUrl: \"%s\"},\n", b.Title, b.Author, b.Isbn, b.WorkUrl)
-		}
 		t.Fatalf("\nWant:\n%+v\nGot:\n%+v\n", want, got)
 	}
 }

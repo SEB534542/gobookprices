@@ -12,6 +12,7 @@ import (
 const HostUrl = "https://www.goodreads.com/"
 
 type Library struct {
+	hostUrl   string
 	ListUrl   string
 	Shelf     string
 	Formats   []string
@@ -230,24 +231,27 @@ func getEditionUrl(hostUrl, workUrl string) (string, error) {
 	return editionUrl, nil
 }
 
-func NewLibrary(hostUrl, listUrl, shelf string, formats []string, languages []string) (Library, error) {
-	books, err := GetBooks(hostUrl, listUrl, shelf)
-	for i, _ := range books {
-		// get the Editions Url
-		// books[i].EditionsUrl, _ = getEditionUrl(hostUrl, books[i].WorkUrl)\
-		url, _ := getEditionUrl(hostUrl, books[i].WorkUrl)
-		books[i].EditionsUrl = url
-		// get all editions from that url
-		// books[i].Editions, err = GetEditions(HostUrl, books[i].EditionsUrl, formats, languages)
-		editions, _ := GetEditions(HostUrl, books[i].EditionsUrl, formats, languages)
-		books[i].Editions = editions
-	}
+// NewLibrary takes all parameters for the url (host, list and shelf), the required book formats and languages. It returns an empty library with all parameters.
+func NewLibrary(listUrl, shelf string, formats []string, languages []string) Library {
 	l := Library{
+		hostUrl:   HostUrl,
 		ListUrl:   listUrl,
 		Shelf:     shelf,
 		Formats:   formats,
 		Languages: languages,
-		Books:     books,
 	}
-	return l, err
+	return l
+}
+
+// Update connects to the host with all parameters that are specified in the type. It retrieves all books and returns an error.
+func (l *Library) Update() error {
+	var err error
+	l.Books, err = GetBooks(l.hostUrl, l.ListUrl, l.Shelf)
+	for i := range l.Books {
+		// get the Editions Url
+		l.Books[i].EditionsUrl, _ = getEditionUrl(l.hostUrl, l.Books[i].WorkUrl)
+		// get all editions from that url
+		l.Books[i].Editions, err = GetEditions(HostUrl, l.Books[i].EditionsUrl, l.Formats, l.Languages)
+	}
+	return err
 }
