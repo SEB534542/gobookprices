@@ -243,8 +243,16 @@ func NewLibrary(listUrl, shelf string, formats []string, languages []string) Lib
 	return l
 }
 
-// Update connects to the host with all parameters that are specified in the type. It retrieves all books, get the editions not yet present, and returns an error.
-func (l *Library) Update() error {
+// UpdateConfig takes the library parameters and updates them.
+func (l *Library) UpdateConfig(listUrl, shelf string, formats, languages []string) {
+	l.ListUrl = listUrl
+	l.Shelf = shelf
+	l.Formats = formats
+	l.Languages = languages
+}
+
+// Get connects to the host with all parameters that are specified in the type. It retrieves all books, get the editions not yet present, and returns an error.
+func (l *Library) Get() error {
 	booksNew, err := GetBooks(l.hostUrl, l.ListUrl, l.Shelf)
 	l.Books = compareAndUpdate(l.Books, booksNew)
 
@@ -260,8 +268,8 @@ func (l *Library) Update() error {
 	return err
 }
 
-// UpdateFull connects to the host with all parameters that are specified in the type. It retrieves all books and retrieves the corresponding editions. It returns an error.
-func (l *Library) UpdateFull() error {
+// GetAll connects to the host with all parameters that are specified in the type. It retrieves all books and retrieves the corresponding editions. It returns an error.
+func (l *Library) GetAll() error {
 	var err error
 	l.Books, err = GetBooks(l.hostUrl, l.ListUrl, l.Shelf)
 

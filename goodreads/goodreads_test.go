@@ -280,7 +280,7 @@ func TestNewLibrary(t *testing.T) {
 			},
 		},
 	}
-	err := got.Update()
+	err := got.Get()
 
 	switch {
 	case err != nil:
@@ -292,22 +292,22 @@ func TestNewLibrary(t *testing.T) {
 
 func TestCompareAndUpdate(t *testing.T) {
 	booksOld := []Book{
-			{Title: "Het parfum", Author: "Süskind, Patrick", Isbn: "9057134101", WorkUrl: "/book/show/3187658", EditionsUrl: "/work/editions/62945242",
-				Editions: []Edition{
-					{Isbn: "9788408258216", Format: "Kindle Edition", Language: "Spanish"},
-					{Isbn: "9786070791734", Format: "Kindle Edition", Language: "Spanish"},
-					{Isbn: "9789021462691", Format: "ebook", Language: "Dutch"},
-				}},
-			{Title: "Fool's Assassin (The Fitz and the Fool, #1)", Author: "Hobb, Robin", Isbn: "0553392433", WorkUrl: "/book/show/41021196"},
-			{Title: "Dark Disciple", Author: "Golden, Christie", Isbn: "B01EKIFQ7Y", WorkUrl: "/book/show/23277298", EditionsUrl: "/work/editions/62945242"},
-			{Title: "Enterprise Architecture As Strategy: Creating a Foundation for Business Execution", Author: "Ross, Jeanne W.", Isbn: "1591398398", WorkUrl: "/book/show/70137"},
-		}
-	booksNew :=  []Book{
-			{Title: "Ready Player Two (Ready Player One, #2)", Author: "Cline, Ernest", Isbn: "1524761338", WorkUrl: "/book/show/26082916"},
-			{Title: "Het parfum", Author: "Süskind, Patrick", Isbn: "9057134101", WorkUrl: "/book/show/3187658"},
-			{Title: "Red Sister (Book of the Ancestor, #1)", Author: "Lawrence, Mark", Isbn: "1101988851", WorkUrl: "/book/show/25895524"},
-			{Title: "Dark Disciple", Author: "Golden, Christie", Isbn: "B01EKIFQ7Y", WorkUrl: "/book/show/23277298"},
-		}
+		{Title: "Het parfum", Author: "Süskind, Patrick", Isbn: "9057134101", WorkUrl: "/book/show/3187658", EditionsUrl: "/work/editions/62945242",
+			Editions: []Edition{
+				{Isbn: "9788408258216", Format: "Kindle Edition", Language: "Spanish"},
+				{Isbn: "9786070791734", Format: "Kindle Edition", Language: "Spanish"},
+				{Isbn: "9789021462691", Format: "ebook", Language: "Dutch"},
+			}},
+		{Title: "Fool's Assassin (The Fitz and the Fool, #1)", Author: "Hobb, Robin", Isbn: "0553392433", WorkUrl: "/book/show/41021196"},
+		{Title: "Dark Disciple", Author: "Golden, Christie", Isbn: "B01EKIFQ7Y", WorkUrl: "/book/show/23277298", EditionsUrl: "/work/editions/62945242"},
+		{Title: "Enterprise Architecture As Strategy: Creating a Foundation for Business Execution", Author: "Ross, Jeanne W.", Isbn: "1591398398", WorkUrl: "/book/show/70137"},
+	}
+	booksNew := []Book{
+		{Title: "Ready Player Two (Ready Player One, #2)", Author: "Cline, Ernest", Isbn: "1524761338", WorkUrl: "/book/show/26082916"},
+		{Title: "Het parfum", Author: "Süskind, Patrick", Isbn: "9057134101", WorkUrl: "/book/show/3187658"},
+		{Title: "Red Sister (Book of the Ancestor, #1)", Author: "Lawrence, Mark", Isbn: "1101988851", WorkUrl: "/book/show/25895524"},
+		{Title: "Dark Disciple", Author: "Golden, Christie", Isbn: "B01EKIFQ7Y", WorkUrl: "/book/show/23277298"},
+	}
 	want := []Book{
 		{Title: "Ready Player Two (Ready Player One, #2)", Author: "Cline, Ernest", Isbn: "1524761338", WorkUrl: "/book/show/26082916"},
 		{Title: "Het parfum", Author: "Süskind, Patrick", Isbn: "9057134101", WorkUrl: "/book/show/3187658", EditionsUrl: "/work/editions/62945242",
