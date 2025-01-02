@@ -2,7 +2,6 @@ package gobookprices
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -71,26 +70,28 @@ func getPriceKobo(hostUrl, isbn string) (float64, error) {
 		return 0.0, fmt.Errorf("failed to load HTML from '%s': %w", url, err)
 	}
 
-	// Initialize a variable to store the price as float64
-	var price float64
-
-	// Find the span with class "price" and extract the text
-	doc.Find(".price-wrapper .price").Each(func(i int, s *goquery.Selection) {
-		priceText := strings.TrimSpace(s.Text()) // Extract the raw price text
-
-		// Remove the currency symbol (€) and replace the comma with a dot
-		cleanedPrice := strings.Replace(strings.TrimPrefix(priceText, "€ "), ",", ".", 1)
-
-		// Convert to float64
-		price, err = strconv.ParseFloat(cleanedPrice, 64)
-		if err != nil {
-			log.Printf("Error parsing price: %v", err)
-		} else {
-			fmt.Printf("Extracted price: %.2f\n", price) // Use the price as needed
+	// Find the price from the 'data-price' attribute
+	price := ""
+	doc.Find("div.price-format").EachWithBreak(func(i int, s *goquery.Selection) bool {
+		price, _ = s.Attr("data-price")
+		if price != "" {
+			return false // Stop after finding the first price
 		}
+		return true
 	})
 
-	return price, err
+	if price == "" {
+		return 0.0, ErrorNotFound
+	}
+	// Clean and convert the price to float64
+	price = strings.ReplaceAll(price, "€", "")  // Remove €
+	price = strings.ReplaceAll(price, ",", ".") // Replace ',' with '.'
+	priceFloat, err := strconv.ParseFloat(strings.TrimSpace(price), 64)
+	if err != nil {
+		err = fmt.Errorf("error converting price from '%s' to float: %w", url, err)
+	}
+
+	return priceFloat, err
 }
 
 // getPriceOB takes a URL to a Host and the isbn you want to get the price from Bol from. It returns the price and an error.

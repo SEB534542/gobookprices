@@ -26,11 +26,9 @@ func TestGetPriceBol(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(r.URL.RawQuery, isbn) {
-			t.Log("1")
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(mockHtmlBol1))
 		} else {
-			t.Log("2")
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(mockHtmlBol2))
 		}
@@ -40,7 +38,7 @@ func TestGetPriceBol(t *testing.T) {
 	t.Run("default test", func(t *testing.T) {
 		want := 7.99
 		got, err := getPriceBol(server.URL, isbn)
-		
+
 		switch {
 		case err != nil:
 			t.Errorf("error getting price for '%s': %s\nWant: '%.2f'\tGot: '%.2f'\n", isbn, err, want, got)
