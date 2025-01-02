@@ -51,7 +51,11 @@ func getPriceBol(hostUrl, isbn string) (float64, error) {
 		}
 	})
 
-	return price, nil
+	if price == 0.0 {
+		err = ErrorNotFound
+	}
+
+	return price, err
 }
 
 func getPriceKobo(hostUrl, isbn string) (float64, error) {
@@ -74,10 +78,7 @@ func getPriceKobo(hostUrl, isbn string) (float64, error) {
 	price := ""
 	doc.Find("div.price-format").EachWithBreak(func(i int, s *goquery.Selection) bool {
 		price, _ = s.Attr("data-price")
-		if price != "" {
-			return false // Stop after finding the first price
-		}
-		return true
+		return price == ""
 	})
 
 	if price == "" {
