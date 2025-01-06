@@ -71,14 +71,14 @@ func getBooksFromPage(url string) ([]Book, error) {
 		workUrl, _ := l.Find(".js-tooltipTrigger").Attr("data-resource-id")
 		workUrl = fmt.Sprintf("/book/show/%s", workUrl)
 		// editionUrl, _ := l.Find("td.field.format a").Attr("href") // commented-out because this only works if you've accepted the cookies.
-
-		books = append(books, Book{
+		book := Book{
 			Title:   title,
 			Author:  author,
 			Isbn:    isbn,
 			WorkUrl: workUrl,
 			//	EditionsUrl: editionUrl,
-		})
+		}
+		books = append(books, book)
 	})
 	return books, nil
 }
@@ -231,7 +231,8 @@ func getEditionUrl(hostUrl, workUrl string) (string, error) {
 	return editionUrl, nil
 }
 
-// NewLibrary takes all parameters for the url (host, list and shelf), the required book formats and languages. It returns an empty library with all parameters.
+// NewLibrary takes all parameters for the url (host, list and shelf), the required book formats and languages.
+// It returns an empty library with all parameters.
 func NewLibrary(listUrl, shelf string, formats []string, languages []string) Library {
 	l := Library{
 		hostUrl:   HostUrl,
@@ -251,7 +252,8 @@ func (l *Library) UpdateConfig(listUrl, shelf string, formats, languages []strin
 	l.Languages = languages
 }
 
-// Get connects to the host with all parameters that are specified in the type. It retrieves all books, get the editions not yet present, and returns an error.
+// Get connects to the host with all parameters that are specified in the type.
+// It retrieves all books, get the editions not yet present, updates the library and returns an error.
 func (l *Library) Get() error {
 	booksNew, err := GetBooks(l.hostUrl, l.ListUrl, l.Shelf)
 	l.Books = compareAndUpdate(l.Books, booksNew)
@@ -268,7 +270,8 @@ func (l *Library) Get() error {
 	return err
 }
 
-// GetAll connects to the host with all parameters that are specified in the type. It retrieves all books and retrieves the corresponding editions. It returns an error.
+// GetAll connects to the host with all parameters that are specified in the type.
+// It retrieves all books, retrieves the corresponding editions and updates the library. It returns an error.
 func (l *Library) GetAll() error {
 	var err error
 	l.Books, err = GetBooks(l.hostUrl, l.ListUrl, l.Shelf)
@@ -280,7 +283,8 @@ func (l *Library) GetAll() error {
 	return err
 }
 
-// compareAndUpdate takes two slices of Books. It updates the second slice with the editionUrl and editions from the first slice, and returns the second slice with the updated data.
+// compareAndUpdate takes two slices of Books.
+// It updates the second slice with the editionUrl and editions from the first slice, and returns the second slice with the updated data.
 func compareAndUpdate(booksOld, booksNew []Book) []Book {
 	// Only use books that have actual data to update the new library with this data
 	books := []Book{}
