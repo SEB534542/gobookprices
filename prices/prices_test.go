@@ -3,8 +3,10 @@ package gobookprices
 import (
 	_ "embed"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -24,111 +26,62 @@ var (
 	mockHtmlOB2 string
 )
 
-func TestGetPriceBol(t *testing.T) {
-	isbn := "9789021462691"
-
+func TestGetPrices(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.URL.RawQuery, isbn) {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(mockHtmlBol1))
-		} else {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(mockHtmlBol2))
-		}
-	}))
-	defer server.Close()
-
-	t.Run("default test", func(t *testing.T) {
-		want := 7.99
-		got, err := getPriceBol(server.URL, isbn)
-
-		switch {
-		case err != nil:
-			t.Errorf("error getting price for '%s': %s\nWant: '%.2f'\tGot: '%.2f'\n", isbn, err, want, got)
-		case want != got:
-			t.Errorf("Want: '%.2f'\tGot: '%.2f'", want, got)
-		}
-	})
-
-	t.Run("no results expected", func(t *testing.T) {
-		want := 0.0
-		got, err := getPriceBol(server.URL, "97890234341462691")
-
-		if !errors.Is(ErrorNotFound, err) {
-			t.Errorf("Expected error: '%s', but got: '%v', with:\nWant: '%.2f'\tGot: '%.2f'\n", ErrorNotFound, err, want, got)
-		}
-	})
-}
-
-func TestGetPriceKobo(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.URL.RawQuery, "9789021462691") {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(mockHtmlKobo1))
-		} else {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(mockHtmlKobo2))
-		}
-	}))
-	defer server.Close()
-
-	t.Run("default test", func(t *testing.T) {
-
 		isbn := "9789021462691"
-		want := 7.99
-		got, err := getPriceKobo(server.URL, isbn)
-
-		switch {
-		case err != nil:
-			t.Errorf("error getting price for '%s': %s\nWant: '%.2f'\tGot: '%.2f'\n", isbn, err, want, got)
-		case want != got:
-			t.Errorf("Want: '%.2f'\tGot: '%.2f'", want, got)
-		}
-	})
-
-	t.Run("no results expected", func(t *testing.T) {
-		isbn := "97890234341462691"
-		want := 0.0
-		got, err := getPriceKobo(server.URL, isbn)
-
-		if !errors.Is(ErrorNotFound, err) {
-			t.Errorf("Expected error: '%s', but got: '%v', with:\nWant: '%.2f'\tGot: '%.2f'\n", ErrorNotFound, err, want, got)
-		}
-	})
-}
-
-func TestGetPriceOB(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.URL.RawQuery, "9789021462691") {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(mockHtmlOB1))
-		} else {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(mockHtmlOB2))
+		if strings.Contains(r.URL.Path, HostBol) {
+			switch {
+			case strings.Contains(r.URL.RawQuery, isbn):
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(mockHtmlBol1))
+			default:
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(mockHtmlBol2))
+			}
+		} else if strings.Contains(r.URL.Path, HostKobo) {
+			switch {
+			case strings.Contains(r.URL.RawQuery, isbn):
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(mockHtmlKobo1))
+			default:
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(mockHtmlKobo2))
+			}
+		} else if strings.Contains(r.URL.Path, HostOB) {
+			switch {
+			case strings.Contains(r.URL.RawQuery, isbn):
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(mockHtmlOB1))
+			default:
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(mockHtmlOB2))
+			}
 		}
 	}))
 	defer server.Close()
+	AllSites[0].Host = fmt.Sprintf("%s/%s/", server.URL, HostBol)
+	AllSites[1].Host = fmt.Sprintf("%s/%s/", server.URL, HostKobo)
+	AllSites[2].Host = fmt.Sprintf("%s/%s/", server.URL, HostOB)
 
 	t.Run("default test", func(t *testing.T) {
 		isbn := "9789021462691"
-		want := 0.00
-		got, err := getPriceOB(HostOB, isbn)
+		want := []float64{7.99, 7.99, 0.00}
+		got, err := AllSites.GetPrices(isbn)
 
-		switch {
-		case err != nil:
-			t.Errorf("error getting price for '%s': %s\nWant: '%.2f'\tGot: '%.2f'\n", isbn, err, want, got)
-		case want != got:
-			t.Errorf("Want: '%.2f'\tGot: '%.2f'", want, got)
+		if err != nil {
+			t.Error("error getting price:", err)
+		}
+		if !reflect.DeepEqual(want, got) {
+			t.Errorf("Want: '%v', Got: '%v'\n", want, got)
 		}
 	})
 
-	t.Run("test with no results", func(t *testing.T) {
+	// case 2
+	t.Run("not existing isbn", func(t *testing.T) {
 		isbn := "97890234341462691"
-		want := 0.00
-		got, err := getPriceOB(HostOB, isbn)
-
-		if !errors.Is(ErrorNotFound, err) {
-			t.Errorf("Expected error: '%s', but got: '%v', with:\nWant: '%.2f'\tGot: '%.2f'\n", ErrorNotFound, err, want, got)
+		got, err := AllSites.GetPrices(isbn)
+		if !errors.Is(err, ErrorNotFound) {
+			t.Errorf("retrieved '%v' with error: %s", got, err)
 		}
 	})
 }
